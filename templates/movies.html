@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Movies</title>
+</head>
+<body class="movies">
+    <nav>
+        <a href="/"><button>Home</button></a>
+        <a href="/movies"><button>Movies</button></a>
+        <a href="/users"><button>Users</button></a>
+    </nav>
+
+    <section class="movies_container">
+        {% if movies %}
+            {% for movie in movies %}
+                <div class="movie_card">
+                    <img src="{{ movie.poster }}" class="movie_poster">
+                    <div class="movie_details">
+                        <h3 class="movie_title">{{ movie.title }}</h3>
+                        <p class="movie_year"><strong>Release year:</strong> <span class="year">{{ movie.release_year }}</span></p>
+                        <div class="movie_rating"> <strong>IMBd Rating:</strong>
+                            <span>⭐ {{ movie.rating }}</span>
+                        </div>
+                        <p class="movie-director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no_movies"><strong>No movies available.</strong></p>
+        {% endif %}
+    </section>
+</body>
+</html>
