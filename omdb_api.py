@@ -26,7 +26,16 @@ def fetch_movie_data(title):
         print(f"Request error occurred: {req_err}")
         return None
 
-    data = response.json()
+    try:
+        data = response.json()
+    except ValueError as json_err:
+        print(f"Error parsing JSON: {json_err}")
+        return None
+
+    # Catch API error response
+    if "Error" in data:
+        print(f"Error fetching movie data: {data['Error']}")
+        return None
 
     # Extract relevant movie data
     movie_data = {
