@@ -3,7 +3,7 @@ import sys
 
 from sqlalchemy import inspect
 
-from data_models import db
+from datamanager.sqlite_data_manager import db
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,7 +11,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 def validate_database(app):
     """Validates the database by checking the file path and file itself. Exits the program and links
     to the setup file if filepath or database missing / corrupt"""
-    db_path = os.path.join(basedir, 'data', 'library.sqlite')
+    db_path = os.path.join(basedir, 'data', 'movies.db')
 
     if not os.path.isfile(db_path):
         print("❌ Database not found. Please run db_setup.py to create the database.")
