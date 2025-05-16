@@ -4,6 +4,13 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
+    """
+    Represents a user in the database.
+
+    Attributes:
+        id (int): The unique identifier for the user.
+        name (str): The name of the user.
+    """
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -19,6 +26,15 @@ class User(db.Model):
 
 
 class Movie(db.Model):
+    """Represents a movie in the database.
+
+    Attributes:
+        id (int): The unique identifier for the movie.
+        title (str): The title of the movie.
+        release_year (int): The release year of the movie.
+        poster (str): The URL of the movie poster.
+        director (str): The director of the movie.
+        rating (float): The rating of the movie."""
     __tablename__ = 'movie'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -39,6 +55,12 @@ class Movie(db.Model):
 
 
 class UserMovies(db.Model):
+    """The connection table between users and movies.
+
+    Attributes:
+        id (int): The unique identifier for the connection.
+        user_id(int): The id of the user.
+        movie_id (int): The id of the movie."""
     __tablename__ = 'user_movies'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

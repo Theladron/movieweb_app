@@ -8,6 +8,11 @@ OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 
 
 def fetch_movie_data(title):
+    """
+    Fetches movie data with the specified title from the OMDb API, handles exceptions
+    :param title: title of the movie as string
+    :return: movie data as dictionary
+    """
     api_url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&t={title}"
 
     headers = {

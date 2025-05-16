@@ -7,14 +7,28 @@ from services.omdb_api import fetch_movie_data
 
 
 class SQLiteDataManager(DataManagerInterface):
+    """
+    Imitates a data manager for a SQLite database.
+
+    Attributes:
+        db (SQLAlchemy): SQLAlchemy instance
+        db_path (str): Path to the database file
+        """
+
     def __init__(self):
+        """Initializes the SQLiteDataManager instance."""
         self.db = db
         self.db_path = None
 
     def init_app(self, app):
+        """Initializes the SQLiteDataManager instance with the provided Flask app."""
         self.db_path = app.config.get("SQLALCHEMY_DATABASE_URI", "sqlite:///movies.db")
 
     def get_all_users(self):
+        """
+        Fetches all users from the database
+        :return: All users as a list if found, else an empty list
+        """
         try:
             return self.db.session.query(User).all()
         except SQLAlchemyError as error:
@@ -22,6 +36,10 @@ class SQLiteDataManager(DataManagerInterface):
             return []
 
     def get_all_movies(self):
+        """
+        Fetches all movies from the database
+        :return: all movies as a list if found, else an empty list
+        """
         try:
             return self.db.session.query(Movie).all()
         except SQLAlchemyError as error:
@@ -29,6 +47,10 @@ class SQLiteDataManager(DataManagerInterface):
             return []
 
     def get_user_movies(self, user_id):
+        """
+        Fetches all movies associated with a user from the database
+        :return: all movies as a list if found, else an empty list
+        """
         try:
             movies = (
                 self.db.session.query(Movie)
@@ -42,6 +64,10 @@ class SQLiteDataManager(DataManagerInterface):
             return []
 
     def get_user(self, user_id):
+        """
+        Fetches a user by ID from the database
+        :return: User object if found, else None
+        """
         try:
             user = (self.db.session.query(User).filter(User.id == user_id).one_or_none())
             if not user:
@@ -52,6 +78,11 @@ class SQLiteDataManager(DataManagerInterface):
             return
 
     def add_user(self, user_name):
+        """
+        Adds a new user to the database
+        :param user_name: name of the user as string
+        :return: name of the user as string
+        """
         if not user_name:
             raise ValueError("User name cannot be empty")
         new_user = User(name=user_name)
@@ -60,6 +91,12 @@ class SQLiteDataManager(DataManagerInterface):
         return user_name
 
     def update_user(self, user_id, user_name):
+        """
+        updates the name of a user
+        :param user_id: the id of the user as integer
+        :param user_name: the name of the user as string
+        :return: the updated name of the user if found, else an error message as string
+        """
         try:
             updated_user = self.get_user(user_id)
             if not updated_user:
@@ -74,6 +111,11 @@ class SQLiteDataManager(DataManagerInterface):
             raise ValueError(f"Could not update user with ID {user_id}; {error}")
 
     def delete_user(self, user_id):
+        """
+        Deletes a user from the database
+        :param user_id: id of the user as integer
+        :return: name of the deleted user as string if found, else None
+        """
         try:
             user_to_delete = self.get_user(user_id)
             if not user_to_delete:
@@ -105,6 +147,11 @@ class SQLiteDataManager(DataManagerInterface):
             raise ValueError(f"Error occurred while deleting user with ID {user_id}: {error}")
 
     def get_user_by_name(self, user_name):
+        """
+        Gets a user by name
+        :param user_name: the name of the user as string
+        :return: user as User object
+        """
         try:
             user = self.db.session.query(User).filter(User.name == user_name).one_or_none()
             return user
@@ -112,6 +159,11 @@ class SQLiteDataManager(DataManagerInterface):
             raise SQLAlchemyError(f"Error fetching user by name: {error}")
 
     def get_movie(self, movie_id):
+        """
+        Gets a movie object from the database by ID
+        :param movie_id: the id of the movie as integer
+        :return: movie as Movie object
+        """
         try:
             movie = self.db.session.query(Movie).filter(Movie.id == movie_id).one_or_none()
             if not movie:
@@ -121,7 +173,12 @@ class SQLiteDataManager(DataManagerInterface):
             raise SQLAlchemyError(f"Error fetching movie with ID {movie_id}: {error}")
 
     def add_movie(self, user_id, title):
-
+        """
+        Adds a movie to the database
+        :param user_id: id of the user as integer
+        :param title: title of the movie as string
+        :return: status codes as dictionary
+        """
         # Fetch movie data from OMDb
         movie_data = fetch_movie_data(title)
         if not movie_data:
@@ -177,6 +234,12 @@ class SQLiteDataManager(DataManagerInterface):
         return {"message": "added", "movie": existing_movie}
 
     def delete_movie(self, user_id, movie_id):
+        """
+        Deletes a movie from the database
+        :param user_id: user id as integer
+        :param movie_id: movie id as integer
+        :return: the removed movie as Movie object if found, else None
+        """
         try:
             # Find the entry linking the user and movie
             user_movie = self.db.session.query(UserMovies).filter_by(user_id=user_id,
@@ -204,6 +267,12 @@ class SQLiteDataManager(DataManagerInterface):
             return None
 
     def update_movie(self, movie_id, user_id, rating=None):
+        """
+        Updates the rating of a movie
+        :param movie_id: id of the movie as integer
+        :param user_id: id of the user as integer
+        :param rating: new rating of the movie as float
+        """
         try:
             movie_to_update = self.get_movie(movie_id)
             if not movie_to_update:

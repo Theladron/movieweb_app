@@ -9,6 +9,7 @@ movie_bp = Blueprint('movie', __name__)
 
 @movie_bp.route('/movies')
 def show_movies():
+    """Shows all movies in the database. Handles exceptions."""
     try:
         movies = data.get_all_movies()
         return render_template('movies.html', movies=movies)
@@ -18,6 +19,7 @@ def show_movies():
 
 @movie_bp.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
 def add_movie(user_id):
+    """Adds a movie to the user's list of movies. Handles exceptions."""
     try:
         user_name = data.get_user(user_id)
     except sqlalchemy.exc.NoResultFound:
@@ -67,6 +69,7 @@ def add_movie(user_id):
 
 @movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
+    """Updates the rating of a movie. Handles exceptions."""
     try:
         movie = data.get_movie(movie_id)
     except sqlalchemy.exc.NoResultFound:
@@ -110,6 +113,11 @@ def update_movie(user_id, movie_id):
 
 @movie_bp.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['GET'])
 def delete_movie(user_id, movie_id):
+    """
+    Deletes a movie from the user's list of movies.
+    Once no user has the movie in their list,
+    deletes the movie entirely. Handles exceptions.
+    """
     try:
         movie_to_delete = data.delete_movie(user_id, movie_id)
         if not movie_to_delete:

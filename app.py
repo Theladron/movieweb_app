@@ -12,6 +12,10 @@ load_dotenv()
 
 
 def create_app():
+    """
+    Creates and configures the Flask application, calls for
+    database validation and blueprint registration.
+    """
     app = Flask(__name__)
 
     basedir = os.path.abspath(os.path.dirname(__file__))

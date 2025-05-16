@@ -9,6 +9,7 @@ user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/users')
 def show_users():
+    """Shows all users in the system, handles exceptions"""
     try:
         users = data.get_all_users()
         message = "No users found." if not users else None
@@ -19,6 +20,7 @@ def show_users():
 
 @user_bp.route('/add_user', methods=['GET', 'POST'])
 def add_user():
+    """Adds a user to the system, handles exceptions"""
     if request.method == "POST":
         name = request.form.get('name').strip()
 
@@ -58,6 +60,7 @@ def add_user():
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
+    """Shows the movies associated with a user, handles exceptions"""
     try:
         # Fetch user details
         user = data.get_user(user_id)
@@ -84,6 +87,7 @@ def user_movies(user_id):
 
 @user_bp.route('/users/<int:user_id>/update_user', methods=['GET', 'POST'])
 def update_user(user_id):
+    """Updates a user's name in the system, handles exceptions"""
     if request.method == "POST":
         name = request.form.get("name").strip()
 
@@ -146,7 +150,7 @@ def update_user(user_id):
 
 @user_bp.route('/users/<user_id>/delete_user', methods=['GET'])
 def delete_user(user_id):
-    """Delete a user from the system."""
+    """Delete a user from the system, handles exceptions."""
     try:
         user_name = data.delete_user(user_id)
         if not user_name:
