@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Update Movie</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="update_movie">
     <nav>
@@ -14,7 +14,7 @@
         <a href="/users"><button>Users</button></a>
     </nav>
 
-    <form action="" method="POST" class="update-form">
+    <form action="" method="POST" class="styled-form">
 
         <label for="rating">Update '{{ movie.title }}' rating</label>
         <input

@@ -10,6 +10,7 @@ body, html {
     background-attachment: fixed;
     background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5)), url('/static/images/movie-background.jpg');
     background-color: rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
 }
 
 /* Top navigation bar */
@@ -51,19 +52,20 @@ nav button:hover {
     margin-top: 15vh;
     text-align: center;
     background: linear-gradient(rgba(180, 0, 0, 1), rgba(0, 0, 0, 0.7));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text; /* for Firefox */
-  color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
 }
 
-/* Content wrapper */
-.content {
+/* Description block */
+.description p, .subtitle {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 /* Alert message (e.g., no users found) */
@@ -77,6 +79,60 @@ nav button:hover {
     padding: 0.75rem 1rem;
     width: fit-content;
     border-radius: 6px;
+}
+
+.styled-form {
+    max-width: 500px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.styled-form label {
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: linear-gradient(rgba(180, 0, 0, 1), rgba(0, 0, 0, 0.7));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.styled-form input[type="text"] {
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: rgba(255, 255, 255, 0.4); /* Less white */
+    color: #000;
+    outline: none;
+}
+
+.styled-form input[type="text"]:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+.styled-form input[type="submit"] {
+    background-color: #28a745; /* Green button */
+    color: white;
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.styled-form input[type="submit"]:hover {
+    background-color: #218838;
+    transform: scale(1.05);
 }
 
 /* User list container */
@@ -99,10 +155,13 @@ li {
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
-.subtitle{
-    text-align: center;
-    font-size: 1.2rem;}
+
+li:hover {
+    transform: scale(1.03);
+}
+
 /* Username display */
 .username a {
     font-size: 1.7rem;
@@ -117,7 +176,7 @@ li {
 }
 
 /* Action buttons inside each user block */
-li button {
+li button, .action-icon {
     padding: 0.4rem 0.9rem;
     border: none;
     border-radius: 5px;
@@ -133,15 +192,16 @@ li button:hover {
     transform: scale(1.05);
 }
 
-button.remove{
+button.remove {
     background-color: #550000;
-}
-button.update{
-    background-color: green;
-    align-items: right;
 }
 button.remove:hover {
     background-color: #ff4444;
+}
+
+button.update {
+    background-color: green;
+    align-items: right;
 }
 
 /* Add user button */
@@ -157,13 +217,20 @@ button.remove:hover {
     border-radius: 6px;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
+
+.add-user-btn:hover {
+    background-color: #cc0000;
+    transform: scale(1.05);
+}
+
 /* Container holding all movie cards */
 .movies_container {
     display: flex;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    dth: 1200px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -176,8 +243,9 @@ button.remove:hover {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    overflow-wrap: break-word;
+    overflow: hidden;
     backdrop-filter: blur(6px);
+    word-wrap: break-word;
 }
 
 /* Hover effect for movie card */
@@ -216,7 +284,6 @@ button.remove:hover {
 .movie-director {
     margin-bottom: 0.4rem;
     font-size: 0.95rem;
-
 }
 
 /* Label values like year, rating, director */
@@ -232,15 +299,66 @@ button.remove:hover {
     text-align: center;
     margin-top: 3rem;
 }
+/* Movie actions container - center actions at bottom of the card */
+.movie_actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin-top: auto;
+}
 
-.add-user-btn:hover {
-    background-color: #cc0000;
-    transform: scale(1.05);
+/* Style the update action as a green button */
+.movie_actions a.action_icon img {
+    background-color: #28a745;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 55px;
+    height: 17px;
+    object-fit: contain;
 }
-li:hover{
-transition: background-color 0.3s ease, transform 0.2s ease;
-transform: scale(1.03);
+.movie_actions a.action_icon {
+    text-decoration:none;
+    display: flex;
+    align-items: center;
+    transform: translateY(-1px);
+    width: auto;
+    padding: 0;   /* Remove extra spacing */
+    display: flex;
+    align-items: center;
+    color:white;
+    font-size: 1rem;
 }
+
+.movie_actions a.action_icon img:hover {
+    background-color: #218838;
+    transform: scale(1.1);
+}
+
+/* Style the delete action as a red button */
+.movie_actions .remove_button {
+    background-color: #dc3545;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    color:white;
+}
+
+.movie_actions .remove_button:hover {
+    background-color: #c82333;
+    transform: scale(1.1);
+}
+
+.movie_actions .remove_button img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+
 /* Responsive typography */
 @media screen and (max-width: 768px) {
     .title {
@@ -250,5 +368,15 @@ transform: scale(1.03);
     nav button {
         padding: 0.4rem 0.8rem;
         font-size: 0.9rem;
+    }
+
+    .movie_card,
+    .movie_poster {
+        width: 100%;
+    }
+
+    .styled-form {
+        margin: 2rem 1rem;
+        padding: 1.5rem;
     }
 }

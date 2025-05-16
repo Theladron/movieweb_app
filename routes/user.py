@@ -125,9 +125,7 @@ def update_user(user_id):
             return render_template("update_user.html",
                                    user=name, user_id=user_id, message=str(error))
 
-        return render_template("update_user.html",
-                               user=user, user_id=user_id,
-                               message=f" New name: {user.name}. User updated successfully")
+        return render_template('update_user.html', message=f" New name: {user.name}. User updated successfully")
 
     try:
         user = data.get_user(user_id)
@@ -142,10 +140,10 @@ def delete_user(user_id):
     try:
         user_name = data.delete_user(user_id)
         if not user_name:
-            return redirect(url_for('user.users'), message="User not found.")
+            return redirect(url_for('user.users', message="User not found."))
 
-        return redirect(url_for('user.users'), message=f"User '{user_name}' deleted successfully.")
+        return redirect(url_for('user.users', message=f"User '{user_name}' deleted successfully."))
     except ValueError as error:
-        return redirect(url_for('user.users'), message=str(error))
+        return redirect(url_for('user.users', message=str(error)))
     except Exception as error:
-        return redirect(url_for('user.users'), message=str(error))
+        return redirect(url_for('user.users', message=str(error)))

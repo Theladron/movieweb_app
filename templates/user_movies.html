@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <title>User's Movies</title>
 </head>
 <body class="user_movies">
@@ -37,8 +37,8 @@
                         <a href="{{ url_for('movie.update_movie', user_id=user.id, movie_id=movie.id) }}" class="action_icon">
                             <img src="{{ url_for('static', filename='pen.png') }}" alt="Update">
                         </a>
-                        <form action="{{ url_for('movie.delete_movie', user_id=user.id, movie_id=movie.id) }}" method="GET" class="action_icon">
-                            <button type="submit">
+                        <form action="{{ url_for('movie.delete_movie', user_id=user.id, movie_id=movie.id) }}" method="GET">
+                            <button type="submit" class="remove_button">
                                 <img src="{{ url_for('static', filename='bin.png') }}" alt="Delete">
                             </button>
                         </form>
