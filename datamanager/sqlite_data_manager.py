@@ -51,13 +51,6 @@ class SQLiteDataManager(DataManagerInterface):
             raise  # Re-raise the original exception
 
     def add_user(self, user_name):
-        """
-        Add a new user to the database.
-        Args:
-            user_name (str): The name of the user to add.
-        Returns:
-            str: user_name
-        """
         if not user_name:
             raise ValueError("User name cannot be empty")
         new_user = User(name=user_name)
@@ -65,15 +58,21 @@ class SQLiteDataManager(DataManagerInterface):
         self.db.session.commit()
         return user_name
 
+    def update_user(self, user_id, user_name):
+        try:
+            updated_user = self.get_user(user_id)
+            if not updated_user:
+                return f"User with ID {user_id} does not exist."
+
+            updated_user.name = user_name
+            self.db.session.commit()
+            return f"User '{user_name}' was updated successfully!"
+
+        except SQLAlchemyError as error:
+            self.db.session.rollback()
+            raise ValueError(f"Could not update user with ID {user_id}; {error}")
+
     def delete_user(self, user_id):
-        """
-        Delete a user and their associated entries from the database.
-        If a movie is not linked to any other users, it is also deleted.
-        Args:
-            user_id (int): The ID of the user to delete.
-        Returns:
-            str: The name of the deleted user, or None if the user does not exist.
-        """
         try:
             user_to_delete = self.get_user(user_id)
             if not user_to_delete:

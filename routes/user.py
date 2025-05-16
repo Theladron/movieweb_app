@@ -80,47 +80,61 @@ def user_movies(user_id):
 
 @user_bp.route('/users/<int:user_id>/update_user', methods=['GET', 'POST'])
 def update_user(user_id):
-    try:
-        user = data.get_user(user_id)
-    except sqlalchemy.exc.NoResultFound:
-        return render_template('update_user.html',
-                               user=None, user_id=user_id, message="User not found.")
-
     if request.method == "POST":
         name = request.form.get("name").strip()
 
         # Check if the name is provided
         if not name:
             return render_template("update_user.html",
-                                   message="Name is required.")
+                                   user=None, user_id=user_id, message="Name is required.")
 
         # Check if the name is valid
         if len(name) < 2:
             return render_template("update_user.html",
-                                   message=f"Name must be at least 2 characters long.")
+                                   user=name, user_id=user_id, message=f"Name must be at least 2 characters long.")
         if len(name) > 20:
             return render_template("update_user.html",
-                                   message=f"Name must be at most 20 characters long.")
+                                   user=name, user_id=user_id, message=f"Name must be at most 20 characters long.")
 
         # Check if the name already exists
         try:
             existing_user = data.get_user_by_name(name)
             if existing_user:
                 return render_template("update_user.html",
-                                       message=f"The user '{name}' already exists.")
+                                       user=existing_user, user_id=user_id, message=f"The user '{name}' already exists.")
         except ValueError as error:
             return render_template("update_user.html",
-                                   message=str(error))
+                                   user=name, user_id=user_id, message=str(error))
         except SQLAlchemyError as error:
             return render_template("update_user.html",
-                                   message=str(error))
+                                   user=name, user_id=user_id, message=str(error))
         except Exception as error:
             return render_template("update_user.html",
-                                   message=str(error))
+                                   user=name, user_id=user_id, message=str(error))
+
+        try:
+            # Update user details
+            data.update_user(user_id=user_id, user_name=name)
+            user = data.get_user(user_id)
+        except ValueError as error:
+            return render_template("update_user.html",
+                                   user=name, user_id=user_id, message=str(error))
+        except SQLAlchemyError as error:
+            return render_template("update_user.html",
+                                   user=name, user_id=user_id, message=str(error))
+        except Exception as error:
+            return render_template("update_user.html",
+                                   user=name, user_id=user_id, message=str(error))
 
         return render_template("update_user.html",
-                               message="user updated successfully")
+                               user=user, user_id=user_id,
+                               message=f" New name: {user}. User updated successfully")
 
+    try:
+        user = data.get_user(user_id)
+    except sqlalchemy.exc.NoResultFound:
+        return render_template('update_user.html',
+                               user=None, user_id=user_id, message="User not found.")
     return render_template('update_user.html', user=user, user_id=user_id)
 
 @user_bp.route('/users/<user_id>/delete_user', methods=['GET'])
