@@ -62,7 +62,9 @@ nav button:hover {
     flex-direction: column;
     padding: 2rem;
 }
-
+.alert.message {
+    color: red;
+}
 /* Responsive typography */
 @media screen and (max-width: 768px) {
     .title {
@@ -74,3 +76,5 @@ nav button:hover {
         font-size: 0.9rem;
     }
 }
+
+

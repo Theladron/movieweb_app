@@ -50,3 +50,24 @@ class SQLiteDataManager(DataManagerInterface):
             print(f"Error fetching user with ID {user_id}: {error}")
             raise  # Re-raise the original exception
 
+    def add_user(self, user_name):
+        """
+        Add a new user to the database.
+        Args:
+            user_name (str): The name of the user to add.
+        Returns:
+            str: user_name
+        """
+        if not user_name:
+            raise ValueError("User name cannot be empty")
+        new_user = User(name=user_name)
+        self.db.session.add(new_user)
+        self.db.session.commit()
+        return user_name
+
+    def get_user_by_name(self, user_name):
+        try:
+            user = self.db.session.query(User).filter(User.name == user_name).one_or_none()
+            return user
+        except SQLAlchemyError as error:
+            raise SQLAlchemyError(f"Error fetching user by name: {error}")

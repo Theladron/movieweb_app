@@ -18,3 +18,7 @@ class DataManagerInterface(ABC):
     @abstractmethod
     def get_user(self, user_id) -> User:
         pass
+
+    @abstractmethod
+    def add_user(self, user: User) -> None:
+        pass
