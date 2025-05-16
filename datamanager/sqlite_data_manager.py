@@ -173,3 +173,46 @@ class SQLiteDataManager(DataManagerInterface):
             raise ValueError(f"Error occurred while linking movie to user: {error}")
 
         return {"message": "added", "movie": existing_movie}
+
+    def delete_movie(self, user_id, movie_id):
+        try:
+            # Find the entry linking the user and movie
+            user_movie = self.db.session.query(UserMovies).filter_by(user_id=user_id,
+                                                                     movie_id=movie_id).first()
+            if not user_movie:
+                return None
+
+            movie = self.db.session.query(Movie).filter_by(id=movie_id).first()
+            if not movie:
+                return None
+
+            # Delete the user and movie relationship
+            self.db.session.delete(user_movie)
+
+            # Delete the movie if no other user is associated
+            if not self.db.session.query(UserMovies).filter_by(movie_id=movie_id).first():
+                self.db.session.delete(movie)
+
+            self.db.session.commit()
+            return movie
+
+        except SQLAlchemyError as e:
+            print(f"Error deleting movie for user {user_id}: {e}")
+            self.db.session.rollback()
+            return None
+
+    def update_movie(self, movie_id, rating=None):
+        try:
+            movie_to_update = self.get_movie(movie_id)
+            if not movie_to_update:
+                raise ValueError(f"Movie with ID {movie_id} does not exist.")
+
+            # Update the rating if provided
+            movie_to_update.rating = rating or movie_to_update.rating
+
+            self.db.session.commit()
+
+        except SQLAlchemyError as error:
+            print(f"Error occurred while updating movie with ID {movie_id}: {error}")
+            self.db.session.rollback()
+            raise None
