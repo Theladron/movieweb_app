@@ -1,5 +1,7 @@
 import os
+
 from flask import Flask
+
 from datamanager.data_models import db
 
 # creating absolute path to the data folder

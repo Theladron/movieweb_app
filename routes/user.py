@@ -1,9 +1,11 @@
 import sqlalchemy
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
-from managers import data_manager as data
 from sqlalchemy.exc import SQLAlchemyError
 
+from managers import data_manager as data
+
 user_bp = Blueprint('user', __name__)
+
 
 @user_bp.route('/users')
 def show_users():
@@ -13,6 +15,7 @@ def show_users():
         return render_template('users.html', users=users, message=message)
     except Exception as error:
         return render_template("users.html", users=[], message=f"str( {error})")
+
 
 @user_bp.route('/add_user', methods=['GET', 'POST'])
 def add_user():
@@ -52,6 +55,7 @@ def add_user():
 
     return render_template("add_user.html")
 
+
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
     try:
@@ -77,6 +81,7 @@ def user_movies(user_id):
         return render_template("user_movies.html",
                                user=None, movies=None, message=str(error))
 
+
 @user_bp.route('/users/<int:user_id>/update_user', methods=['GET', 'POST'])
 def update_user(user_id):
     if request.method == "POST":
@@ -90,17 +95,20 @@ def update_user(user_id):
         # Check if the name is valid
         if len(name) < 2:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=f"Name must be at least 2 characters long.")
+                                   user=name, user_id=user_id,
+                                   message=f"Name must be at least 2 characters long.")
         if len(name) > 20:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=f"Name must be at most 20 characters long.")
+                                   user=name, user_id=user_id,
+                                   message=f"Name must be at most 20 characters long.")
 
         # Check if the name already exists
         try:
             existing_user = data.get_user_by_name(name)
             if existing_user:
                 return render_template("update_user.html",
-                                       user=existing_user, user_id=user_id, message=f"The user '{name}' already exists.")
+                                       user=existing_user, user_id=user_id,
+                                       message=f"The user '{name}' already exists.")
         except ValueError as error:
             return render_template("update_user.html",
                                    user=name, user_id=user_id, message=str(error))
@@ -125,7 +133,8 @@ def update_user(user_id):
             return render_template("update_user.html",
                                    user=name, user_id=user_id, message=str(error))
 
-        return render_template('update_user.html', message=f" New name: {user.name}. User updated successfully")
+        return render_template('update_user.html',
+                               message=f" New name: {user.name}. User updated successfully")
 
     try:
         user = data.get_user(user_id)
@@ -133,6 +142,7 @@ def update_user(user_id):
         return render_template('update_user.html',
                                user=None, user_id=user_id, message="User not found.")
     return render_template('update_user.html', user=user, user_id=user_id)
+
 
 @user_bp.route('/users/<user_id>/delete_user', methods=['GET'])
 def delete_user(user_id):

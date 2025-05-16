@@ -2,8 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
 
+class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -17,8 +17,8 @@ class User(db.Model):
     def __str__(self):
         return f"{self.id}, {self.name}"
 
-class Movie(db.Model):
 
+class Movie(db.Model):
     __tablename__ = 'movie'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -37,8 +37,8 @@ class Movie(db.Model):
     def __str__(self):
         return f"{self.id}, {self.title}, {self.release_year}"
 
-class UserMovies(db.Model):
 
+class UserMovies(db.Model):
     __tablename__ = 'user_movies'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

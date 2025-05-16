@@ -1,13 +1,15 @@
+from sqlalchemy.exc import SQLAlchemyError
+
 from datamanager.data_manager_interface import DataManagerInterface
 from datamanager.data_models import User, Movie, UserMovies
 from extensions import db
-from sqlalchemy.exc import SQLAlchemyError
 from services.omdb_api import fetch_movie_data
+
 
 class SQLiteDataManager(DataManagerInterface):
     def __init__(self):
-            self.db = db
-            self.db_path = None
+        self.db = db
+        self.db_path = None
 
     def init_app(self, app):
         self.db_path = app.config.get("SQLALCHEMY_DATABASE_URI", "sqlite:///movies.db")

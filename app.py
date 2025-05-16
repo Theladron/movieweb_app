@@ -1,12 +1,15 @@
 import os
+
 from dotenv import load_dotenv
 from flask import Flask
+
 from db_validator import validate_database
-from routes import register_blueprints
 from extensions import db
 from managers import data_manager
+from routes import register_blueprints
 
 load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
@@ -23,6 +26,7 @@ def create_app():
     register_blueprints(app)
 
     return app
+
 
 if __name__ == '__main__':
     app = create_app()

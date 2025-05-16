@@ -6,6 +6,7 @@ from managers import data_manager as data
 
 movie_bp = Blueprint('movie', __name__)
 
+
 @movie_bp.route('/movies')
 def show_movies():
     try:
@@ -13,6 +14,7 @@ def show_movies():
         return render_template('movies.html', movies=movies)
     except Exception as error:
         return jsonify({'error': str(error)}), 404
+
 
 @movie_bp.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
 def add_movie(user_id):
@@ -62,6 +64,7 @@ def add_movie(user_id):
 
     return render_template('add_movie.html', user=user_name)
 
+
 @movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
     try:
@@ -93,7 +96,7 @@ def update_movie(user_id, movie_id):
             data.update_movie(movie_id=movie_id, user_id=user_id, rating=custom_rating)
         except ValueError as error:
             return render_template('update_movie.html', movie=movie,
-                                   user_id=user_id, message = str(error))
+                                   user_id=user_id, message=str(error))
         except Exception as error:
             return render_template('update_movie.html', movie=movie,
                                    user_id=user_id, message=f"An error occurred while "
@@ -103,6 +106,7 @@ def update_movie(user_id, movie_id):
                                user_id=user_id, message="Rating updated successfully!")
 
     return render_template('update_movie.html', movie=movie, user_id=user_id)
+
 
 @movie_bp.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['GET'])
 def delete_movie(user_id, movie_id):

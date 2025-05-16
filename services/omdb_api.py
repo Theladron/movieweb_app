@@ -1,9 +1,11 @@
 import os
+
 import requests
 from requests.exceptions import HTTPError, ConnectionError, Timeout
 
 # Get the API key from environment variables
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
+
 
 def fetch_movie_data(title):
     api_url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&t={title}"
