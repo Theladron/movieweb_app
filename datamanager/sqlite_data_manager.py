@@ -2,6 +2,7 @@ from datamanager.data_manager_interface import DataManagerInterface
 from datamanager.data_models import User, Movie, UserMovies
 from extensions import db
 from sqlalchemy.exc import SQLAlchemyError
+from services.omdb_api import fetch_movie_data
 
 class SQLiteDataManager(DataManagerInterface):
     def __init__(self):
@@ -40,15 +41,13 @@ class SQLiteDataManager(DataManagerInterface):
 
     def get_user(self, user_id):
         try:
-            user = (self.db.session.query(User)
-                    .filter(User.id == user_id)
-                    .one_or_none())
+            user = (self.db.session.query(User).filter(User.id == user_id).one_or_none())
             if not user:
                 raise ValueError(f"No user found with ID {user_id}")
             return user
         except SQLAlchemyError as error:
             print(f"Error fetching user with ID {user_id}: {error}")
-            raise  # Re-raise the original exception
+            return
 
     def add_user(self, user_name):
         if not user_name:
@@ -109,3 +108,68 @@ class SQLiteDataManager(DataManagerInterface):
             return user
         except SQLAlchemyError as error:
             raise SQLAlchemyError(f"Error fetching user by name: {error}")
+
+    def get_movie(self, movie_id):
+        try:
+            movie = self.db.session.query(Movie).filter(Movie.id == movie_id).one_or_none()
+            if not movie:
+                raise ValueError(f"No movie found with ID {movie_id}")
+            return movie
+        except SQLAlchemyError as error:
+            raise SQLAlchemyError(f"Error fetching movie with ID {movie_id}: {error}")
+
+    def add_movie(self, user_id, title):
+
+        # Fetch movie data from OMDb
+        movie_data = fetch_movie_data(title)
+        if not movie_data:
+            return {"message": "not_found", "movie": None}
+
+        title = movie_data.get('title')
+        director = movie_data.get('director', None)
+        rating = movie_data.get('rating', None)
+        poster = movie_data.get('poster', None)
+        release_year = movie_data.get('release_year', None)
+
+        # Check if the movie already exists in the database
+        existing_movie = (
+            self.db.session.query(Movie)
+            .filter_by(title=title, release_year=release_year)
+            .first()
+        )
+        if not existing_movie:
+            # Create a new movie and add it to the database
+            new_movie = Movie(
+                title=title,
+                release_year=release_year,
+                director=director,
+                rating=rating,
+                poster=poster,
+            )
+            try:
+                self.db.session.add(new_movie)
+                self.db.session.commit()
+                existing_movie = new_movie
+            except SQLAlchemyError as error:
+                self.db.session.rollback()
+                raise ValueError(f"Error occurred while adding movie: {error}")
+
+        # Check if the movie is already linked to the user
+        user_movie = (
+            self.db.session.query(UserMovies)
+            .filter_by(user_id=user_id, movie_id=existing_movie.id)
+            .first()
+        )
+        if user_movie:
+            return {"message": "linked", "movie": existing_movie}
+
+        # Link the movie to the user
+        user_movie = UserMovies(user_id=user_id, movie_id=existing_movie.id)
+        try:
+            self.db.session.add(user_movie)
+            self.db.session.commit()
+        except SQLAlchemyError as error:
+            self.db.session.rollback()
+            raise ValueError(f"Error occurred while linking movie to user: {error}")
+
+        return {"message": "added", "movie": existing_movie}

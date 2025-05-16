@@ -1,17 +1,12 @@
 import os
 import requests
-from dotenv import load_dotenv
 from requests.exceptions import HTTPError, ConnectionError, Timeout
 
-# Load environment variables from a .env file
-load_dotenv()
-
 # Get the API key from environment variables
-API_KEY = os.getenv("API_KEY")
-
+OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 
 def fetch_movie_data(title):
-    api_url = f"http://www.omdbapi.com/?apikey={API_KEY}&t={title}"
+    api_url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&t={title}"
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '

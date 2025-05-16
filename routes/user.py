@@ -1,5 +1,5 @@
 import sqlalchemy
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from managers import data_manager as data
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -52,24 +52,23 @@ def add_user():
 
     return render_template("add_user.html")
 
-@user_bp.route('/users/<user_id>', methods=['GET'])
+@user_bp.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
     try:
-
         # Fetch user details
-        user_name = data.get_user(user_id)
-        if not user_name:
+        user = data.get_user(user_id)
+        if not user:
             return render_template('user_movies.html',
-                                   user=None, movies=None)
+                                   user=None, movies=None, message="Error")
 
         # Fetch user movies
         movies = data.get_user_movies(user_id)
         if not movies:
             return render_template('user_movies.html',
-                                   user=user_name, movies=None)
+                                   user=user, movies=None)
 
         return render_template('user_movies.html',
-                               user=user_name, movies=movies)
+                               user=user, movies=movies)
 
     except SQLAlchemyError as error:
         return render_template("user_movies.html",
@@ -128,7 +127,7 @@ def update_user(user_id):
 
         return render_template("update_user.html",
                                user=user, user_id=user_id,
-                               message=f" New name: {user}. User updated successfully")
+                               message=f" New name: {user.name}. User updated successfully")
 
     try:
         user = data.get_user(user_id)
@@ -143,13 +142,10 @@ def delete_user(user_id):
     try:
         user_name = data.delete_user(user_id)
         if not user_name:
-            return render_template('users.html',
-                                   message=f"User with ID {user_id} not found.")
+            return redirect(url_for('user.users'), message="User not found.")
 
-        return render_template('users.html',
-                               message=f"User '{user_name}' deleted successfully!")
+        return redirect(url_for('user.users'), message=f"User '{user_name}' deleted successfully.")
     except ValueError as error:
-        return render_template('users.html', message=str(error))
+        return redirect(url_for('user.users'), message=str(error))
     except Exception as error:
-        return render_template('users.html',
-                               message=f"An unexpected error occurred: {str(error)}")
+        return redirect(url_for('user.users'), message=str(error))

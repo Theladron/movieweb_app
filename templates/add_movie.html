@@ -1,24 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Add User</title>
+    <title>Add Movie</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  </head>
-  <body class="add_user">
+</head>
+<body class="add_movie">
     <nav>
         <a href="/"><button>Home</button></a>
         <a href="/movies"><button>Movies</button></a>
         <a href="/users"><button>Users</button></a>
     </nav>
-
-    <form action="/add_user" method="POST" class="styled-form">
-      <label for="name">Please enter Username</label>
-      <input type="text" id="name" name="name" required><br><br>
-      <input type="submit" value="Add User">
+    <h1 class="title">{{ user.name }}'sMovies</h1>
+    <form action="/users/{{ user.id }}/add_movie" method="POST" class="form">
+        <label for="title">Please enter a movie title</label>
+        <input type="text" id="title" name="title" required><br><br>
+        <input type="submit" value="Add Movie">
     </form>
     {% if message %}
     <p class="alert-message">{{ message }}</p>

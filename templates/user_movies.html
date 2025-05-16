@@ -14,7 +14,7 @@
         <a href="/users"><button>Users</button></a>
     </nav>
     <div class="user_title">
-        <h1><span class="filled">{{ user.name }}'s</span> <span class="outlined">Movies</span></h1>
+        <h1 class="title">{{ user.name }}'s Movies</h1>
     </div>
 
 
@@ -34,10 +34,10 @@
                         <p class="movie_director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
                     </div>
                     <div class="movie_actions">
-                        <a href="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}" class="action_icon">
+                        <a href="{{ url_for('movie.update_movie', user_id=user.id, movie_id=movie.id) }}" class="action_icon">
                             <img src="{{ url_for('static', filename='pen.png') }}" alt="Update">
                         </a>
-                        <form action="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}" method="GET" class="action_icon">
+                        <form action="{{ url_for('movie.delete_movie', user_id=user.id, movie_id=movie.id) }}" method="GET" class="action_icon">
                             <button type="submit">
                                 <img src="{{ url_for('static', filename='bin.png') }}" alt="Delete">
                             </button>
@@ -49,5 +49,9 @@
             <p class="no_movies_message"><strong>No movies added for {{ user.name }} yet.</strong></p>
         {% endif %}
     </section>
+<a href="/users/{{ user.id }}/add_movie" class="add-user-btn">Add Movie</a>
+    {% if message %}
+    <p class="alert-message">{{ message }}</p>
+    {% endif %}
 </body>
 </html>

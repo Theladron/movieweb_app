@@ -1,9 +1,12 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from db_validator import validate_database
 from routes import register_blueprints
 from extensions import db
 from managers import data_manager
+
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
