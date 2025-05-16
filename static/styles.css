@@ -50,7 +50,11 @@ nav button:hover {
     text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
     margin-top: 15vh;
     text-align: center;
-    color: #fff;
+    background: linear-gradient(rgba(180, 0, 0, 1), rgba(0, 0, 0, 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; /* for Firefox */
+  color: transparent;
 }
 
 /* Content wrapper */
@@ -85,7 +89,7 @@ ul {
 
 /* Individual user block */
 li {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.3);
     padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 8px;
@@ -96,7 +100,9 @@ li {
     gap: 1rem;
     flex-wrap: wrap;
 }
-
+.subtitle{
+    text-align: center;
+    font-size: 1.2rem;}
 /* Username display */
 .username a {
     font-size: 1.7rem;
@@ -151,12 +157,90 @@ button.remove:hover {
     border-radius: 6px;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
+/* Container holding all movie cards */
+.movies_container {
+    display: flex;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    dth: 1200px;
+    margin: 0 auto;
+}
+
+/* Individual movie card */
+.movie_card {
+    width: 200px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow-wrap: break-word;
+    backdrop-filter: blur(6px);
+}
+
+/* Hover effect for movie card */
+.movie_card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Movie poster styling */
+.movie_poster {
+    width: 200px;
+    height: auto;
+    object-fit: cover;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+/* Movie details container */
+.movie_details {
+    padding: 1rem;
+    text-align: left;
+    color: #fff;
+}
+
+/* Movie title */
+.movie_title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #ffcc00;
+}
+
+/* Movie year, rating, and director */
+.movie_year,
+.movie_rating,
+.movie-director {
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+
+}
+
+/* Label values like year, rating, director */
+.movie_details span {
+    font-weight: normal;
+    color: #e0e0e0;
+}
+
+/* No movies fallback */
+.no_movies {
+    color: white;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: 3rem;
+}
 
 .add-user-btn:hover {
     background-color: #cc0000;
     transform: scale(1.05);
 }
-
+li:hover{
+transition: background-color 0.3s ease, transform 0.2s ease;
+transform: scale(1.03);
+}
 /* Responsive typography */
 @media screen and (max-width: 768px) {
     .title {
