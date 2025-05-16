@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <title>Movies</title>
+    <title>User's Movies</title>
 </head>
-<body class="movies">
+<body class="user_movies">
     <nav>
         <a href="/"><button>Home</button></a>
         <a href="/movies"><button>Movies</button></a>
         <a href="/users"><button>Users</button></a>
     </nav>
+    <div class="user_title">
+        <h1><span class="filled">{{ user.name }}'s</span> <span class="outlined">Movies</span></h1>
+    </div>
+
+
 
     <section class="movies_container">
         {% if movies %}
@@ -26,12 +31,22 @@
                             <strong>IMBd Rating:</strong>
                             <span>⭐ {{ movie.rating }}</span>
                         </div>
-                        <p class="movie-director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
+                        <p class="movie_director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
+                    </div>
+                    <div class="movie_actions">
+                        <a href="{{ url_for('update_movie', user_id=user.id, movie_id=movie.id) }}" class="action_icon">
+                            <img src="{{ url_for('static', filename='pen.png') }}" alt="Update">
+                        </a>
+                        <form action="{{ url_for('delete_movie', user_id=user.id, movie_id=movie.id) }}" method="GET" class="action_icon">
+                            <button type="submit">
+                                <img src="{{ url_for('static', filename='bin.png') }}" alt="Delete">
+                            </button>
+                        </form>
                     </div>
                 </div>
             {% endfor %}
         {% else %}
-            <p class="no_movies"><strong>No movies available.</strong></p>
+            <p class="no_movies_message"><strong>No movies added for {{ user.name }} yet.</strong></p>
         {% endif %}
     </section>
 </body>

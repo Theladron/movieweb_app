@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Users</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="users">
+    <nav>
+        <a href="/"><button>Home</button></a>
+        <a href="/movies"><button>Movies</button></a>
+        <a href="/users"><button>Users</button></a>
+    </nav>
+    <h1 class="users-title">User's</h1>
+    {% if message %}
+    <p class="alert-message">{{ message }}</p>
+    {% endif %}
+    <ul>
+        {% for user in users %}
+        <li>
+            <div class="username">
+                <a href="{{ url_for('user.user_movies', user_id=user.id) }}">{{ user.name }}</a>
+            </div>
+
+            <a href="{{ url_for('user.update_user', user_id=user.id) }}">
+                <button>Update</button>
+            </a>
+
+            <a href="{{ url_for('user.delete_user', user_id=user.id) }}">
+                <button class="remove">Delete</button>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="/add_user" class="add-user-btn">Add User</a>
+</body>
+</html>

@@ -65,6 +65,45 @@ class SQLiteDataManager(DataManagerInterface):
         self.db.session.commit()
         return user_name
 
+    def delete_user(self, user_id):
+        """
+        Delete a user and their associated entries from the database.
+        If a movie is not linked to any other users, it is also deleted.
+        Args:
+            user_id (int): The ID of the user to delete.
+        Returns:
+            str: The name of the deleted user, or None if the user does not exist.
+        """
+        try:
+            user_to_delete = self.get_user(user_id)
+            if not user_to_delete:
+                return None
+
+            # Get all movie IDs associated with the user
+            user_movies = self.db.session.query(UserMovies).filter_by(user_id=user_id).all()
+            movie_ids = [user_movie.movie_id for user_movie in user_movies]
+
+            # Delete the user's entries in UserMovies
+            self.db.session.query(UserMovies).filter_by(user_id=user_id).delete()
+
+            # Delete the user
+            user_name = user_to_delete.name
+            self.db.session.delete(user_to_delete)
+            self.db.session.commit()
+
+            for movie_id in movie_ids:
+                other_links = self.db.session.query(UserMovies).filter_by(movie_id=movie_id).first()
+                if not other_links:
+                    self.db.session.query(Movie).filter_by(id=movie_id).delete()
+
+            self.db.session.commit()
+
+            return user_name
+
+        except SQLAlchemyError as error:
+            self.db.session.rollback()
+            raise ValueError(f"Error occurred while deleting user with ID {user_id}: {error}")
+
     def get_user_by_name(self, user_name):
         try:
             user = self.db.session.query(User).filter(User.name == user_name).one_or_none()
