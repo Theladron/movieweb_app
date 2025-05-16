@@ -8,9 +8,8 @@ body, html {
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    /* You can set the background image dynamically via inline style or JS */
-    background-image: url('/static/images/movie-background.jpg');
-
+    background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5)), url('/static/images/movie-background.jpg');
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 /* Top navigation bar */
@@ -19,7 +18,7 @@ nav {
     justify-content: flex-start;
     align-items: center;
     padding: 1rem 2rem;
-    background: rgba(0, 0, 0, 0.75); /* semi-transparent dark */
+    background: rgba(0, 0, 0, 0.75);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -40,13 +39,13 @@ nav button {
 }
 
 nav button:hover {
-    background-color: #ff4444; /* Movie-themed red hover */
+    background-color: #ff4444;
     transform: scale(1.05);
 }
 
 /* Main title styling */
 .title {
-    font-family: 'Cinzel', serif; /* A cinematic font (you can load it via Google Fonts if needed) */
+    font-family: 'Cinzel', serif;
     font-size: 4rem;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
     margin-top: 15vh;
@@ -62,9 +61,102 @@ nav button:hover {
     flex-direction: column;
     padding: 2rem;
 }
-.alert.message {
-    color: red;
+
+/* Alert message (e.g., no users found) */
+.alert-message {
+    color: #ff4444;
+    text-align: center;
+    font-size: 1.1rem;
+    margin: 1rem auto;
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid #ff4444;
+    padding: 0.75rem 1rem;
+    width: fit-content;
+    border-radius: 6px;
 }
+
+/* User list container */
+ul {
+    list-style-type: none;
+    padding: 0;
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+/* Individual user block */
+li {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Username display */
+.username a {
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: black;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.username a:hover {
+    color: #ff4444;
+}
+
+/* Action buttons inside each user block */
+li button {
+    padding: 0.4rem 0.9rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-color: #333;
+    color: #f5f5f5;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+li button:hover {
+    background-color: #ff4444;
+    transform: scale(1.05);
+}
+
+button.remove{
+    background-color: #550000;
+}
+button.update{
+    background-color: green;
+    align-items: right;
+}
+button.remove:hover {
+    background-color: #ff4444;
+}
+
+/* Add user button */
+.add-user-btn {
+    display: block;
+    width: fit-content;
+    margin: 2rem auto;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    background-color: #ff4444;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-user-btn:hover {
+    background-color: #cc0000;
+    transform: scale(1.05);
+}
+
 /* Responsive typography */
 @media screen and (max-width: 768px) {
     .title {
@@ -76,5 +168,3 @@ nav button:hover {
         font-size: 0.9rem;
     }
 }
-
-

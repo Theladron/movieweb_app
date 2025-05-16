@@ -201,7 +201,7 @@ class SQLiteDataManager(DataManagerInterface):
             self.db.session.rollback()
             return None
 
-    def update_movie(self, movie_id, rating=None):
+    def update_movie(self, movie_id, user_id, rating=None):
         try:
             movie_to_update = self.get_movie(movie_id)
             if not movie_to_update:

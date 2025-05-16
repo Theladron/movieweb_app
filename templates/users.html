@@ -13,7 +13,7 @@
         <a href="/movies"><button>Movies</button></a>
         <a href="/users"><button>Users</button></a>
     </nav>
-    <h1 class="users-title">User's</h1>
+    <h1 class="title">Users</h1>
     {% if message %}
     <p class="alert-message">{{ message }}</p>
     {% endif %}
@@ -24,13 +24,14 @@
                 <a href="{{ url_for('user.user_movies', user_id=user.id) }}">{{ user.name }}</a>
             </div>
 
+            <div class="user-actions">
             <a href="{{ url_for('user.update_user', user_id=user.id) }}">
-                <button>Update</button>
+            <button class="update">Update</button>
             </a>
 
             <a href="{{ url_for('user.delete_user', user_id=user.id) }}">
-                <button class="remove">Delete</button>
-            </a>
+            <button class="remove">Delete</button>
+        </a>
         </li>
         {% endfor %}
     </ul>
