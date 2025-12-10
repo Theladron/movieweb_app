@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy
 
 from datamanager import data_manager as data
+from services.gemini_api import get_similar_movies
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -150,6 +151,54 @@ def add_user_movie(user_id):
             'success': False,
             'error': f'Database constraint violated: {str(error)}'
         }), 400
+    except Exception as error:
+        return jsonify({
+            'success': False,
+            'error': str(error)
+        }), 500
+
+
+@api_bp.route('/movies/recommendations', methods=['GET'])
+def get_movie_recommendations():
+    """Get AI-powered movie recommendations based on a movie title."""
+    try:
+        # Get movie title from query parameters
+        movie_title = request.args.get('title', '').strip()
+        
+        if not movie_title:
+            return jsonify({
+                'success': False,
+                'error': 'Movie title is required. Provide it as a query parameter: ?title=Movie Name'
+            }), 400
+        
+        # Get recommendations from Gemini API
+        recommendations = get_similar_movies(movie_title)
+        
+        if recommendations is None:
+            # Check if it's an API key issue or another error
+            import os
+            if not os.getenv('GEMINI_API_KEY'):
+                error_msg = 'GEMINI_API_KEY is not set. Please check your .env file and ensure it is passed to the Docker container.'
+            else:
+                error_msg = 'Failed to get movie recommendations. Check server logs for details.'
+            return jsonify({
+                'success': False,
+                'error': error_msg
+            }), 500
+        
+        if len(recommendations) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'No recommendations found for the given movie title.'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'original_movie': movie_title,
+            'recommendations': recommendations,
+            'count': len(recommendations)
+        }), 200
+        
     except Exception as error:
         return jsonify({
             'success': False,

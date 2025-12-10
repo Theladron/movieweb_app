@@ -238,7 +238,7 @@ nav button:hover {
 .add-user-btn {
     display: block;
     width: fit-content;
-    margin: 3rem auto;
+    margin: 0;
     padding: 1.2rem 2.5rem;
     font-size: 1.2rem;
     font-weight: 700;
@@ -255,6 +255,39 @@ nav button:hover {
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 8px 25px var(--shadow-strong);
     background: linear-gradient(135deg, var(--yellow-dark) 0%, var(--yellow-primary) 100%);
+}
+
+/* Back to users button */
+.back-users-btn {
+    display: block;
+    width: fit-content;
+    margin: 0;
+    padding: 1.2rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.8) 0%, rgba(41, 128, 185, 0.9) 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    border: 2px solid rgba(52, 152, 219, 0.6);
+}
+
+.back-users-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6);
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.9) 0%, rgba(52, 152, 219, 0.8) 100%);
+}
+
+/* User actions bottom container */
+.user-actions-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin: 3rem auto;
+    flex-wrap: wrap;
 }
 
 /* User title section */

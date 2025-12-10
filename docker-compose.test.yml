@@ -34,6 +34,7 @@ services:
       # Uncomment to use PostgreSQL for tests:
       # - DATABASE_URL=postgresql://${POSTGRES_USER:-testuser}:${POSTGRES_PASSWORD:-testpass}@test_db:5432/${POSTGRES_DB:-test_moviesdb}
       - OMDB_API_KEY=${OMDB_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       test_db:
         condition: service_healthy

@@ -28,6 +28,7 @@ services:
       - FLASK_ENV=${FLASK_ENV:-development}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-movieuser}:${POSTGRES_PASSWORD:-moviepass}@db:5432/${POSTGRES_DB:-moviesdb}
       - OMDB_API_KEY=${OMDB_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       db:
         condition: service_healthy
@@ -46,6 +47,7 @@ services:
       # Tests use temporary SQLite databases by default (via fixtures)
       - DATABASE_URL=
       - OMDB_API_KEY=${OMDB_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       db:
         condition: service_healthy

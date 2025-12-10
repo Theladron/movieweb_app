@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/movies.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/user_movies.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/recommendations.css') }}">
     <title>User's Movies</title>
 </head>
 <body class="user_movies">
@@ -19,7 +20,8 @@
         <h1 class="title">{{ user.name }}'s Movies</h1>
     </div>
 
-
+    <!-- Recommendations container - dynamically populated by JavaScript -->
+    <div id="recommendations_container" class="recommendations_container"></div>
 
     <section class="movies_container">
         {% if movies %}
@@ -36,6 +38,10 @@
                         <p class="movie_director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
                     </div>
                     <div class="movie_actions">
+                        <button type="button" class="recommend_button" onclick="handleRecommendationsClick('{{ movie.title|replace("'", "\\'") }}')">
+                            <span>🎬</span>
+                            <span>Suggest Similar Movies</span>
+                        </button>
                         <a href="{{ url_for('movie.update_movie', user_id=user.id, movie_id=movie.id) }}" class="action_icon">
                             <span class="icon">✏️</span>
                             <span>Update</span>
@@ -53,9 +59,14 @@
             <p class="no_movies_message"><strong>No movies added for {{ user.name }} yet.</strong></p>
         {% endif %}
     </section>
-<a href="/users/{{ user.id }}/add_movie" class="add-user-btn">Add Movie</a>
+    <div class="user-actions-bottom">
+        <a href="/users/{{ user.id }}/add_movie" class="add-user-btn">Add Movie</a>
+        <a href="/users" class="back-users-btn">Back to Users</a>
+    </div>
     {% if message %}
     <p class="alert-message">{{ message }}</p>
     {% endif %}
+    
+    <script src="{{ url_for('static', filename='js/movie_recommendations.js') }}"></script>
 </body>
 </html>

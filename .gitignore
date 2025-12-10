@@ -20,7 +20,7 @@ data/
 *.db
 
 # Docker
-.dockerignore
+# .dockerignore should be committed (defines Docker build context exclusions)
 
 # Alembic
 # Keep migrations but ignore compiled Python files

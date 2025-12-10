@@ -26,7 +26,8 @@ movieweb_app/
 │   ├── api.py           # REST API endpoints
 │   └── errors.py        # Error handlers
 ├── services/            # External service integrations
-│   └── omdb_api.py      # OMDb API client
+│   ├── omdb_api.py      # OMDb API client
+│   └── gemini_api.py    # Google Gemini API client (AI recommendations)
 ├── templates/           # Jinja2 templates
 ├── static/              # CSS, images, etc.
 └── tests/               # Unit tests (backend & frontend)
@@ -38,12 +39,15 @@ movieweb_app/
 
 - Docker Desktop installed and running
 - OMDb API key ([Get one here](http://www.omdbapi.com/apikey.aspx))
+- Gemini API key (optional, for AI movie recommendations) ([Get one here](https://ai.google.dev/))
 
 ### Installation
 
 1. Clone the repository
 2. Create a `.env` file (see `.env.example`)
-3. Add your OMDb API key to `.env`
+3. Add your API keys to `.env`:
+   - `OMDB_API_KEY` (required)
+   - `GEMINI_API_KEY` (optional, for AI recommendations)
 4. Start the application:
 
 ```bash
@@ -51,6 +55,8 @@ docker-compose up --build
 ```
 
 5. Access the app at http://localhost:<flask_port> (default: 5000)
+
+**Note:** Database migrations are automatically applied on container startup, so the app is ready to use immediately after `docker-compose up`.
 
 For detailed Docker setup and commands, see [README_DOCKER.md](README_DOCKER.md).
 
@@ -71,6 +77,7 @@ docker-compose run --rm tests pytest --cov=. --cov-report=html
 - `GET /api/users` - List all users
 - `GET /api/users/<user_id>/movies` - Get user's movie collection
 - `POST /api/users/<user_id>/movies` - Add movie to user's collection
+- `GET /api/movies/recommendations?title=Movie Title` - Get AI-powered movie recommendations based on a movie title
 
 ## Tech Stack
 
