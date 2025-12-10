@@ -5,7 +5,11 @@ main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def index():
-    """Shows the homepage of the app"""
+    """Display the homepage of the application.
+
+    Returns:
+        Response: Rendered home page template.
+    """
     response = make_response(render_template("home.html"))
     # Prevent premature rendering to avoid FOUC
     response.headers['X-Content-Type-Options'] = 'nosniff'

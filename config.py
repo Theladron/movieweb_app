@@ -4,10 +4,13 @@ from logging.handlers import RotatingFileHandler
 
 
 def configure_database(app):
-    """
-    Configure database connection based on environment.
-    - PostgreSQL: Used if DATABASE_URL starts with postgresql://
-    - SQLite: Used for local development or testing
+    """Configure database connection based on environment.
+
+    Sets up PostgreSQL if DATABASE_URL starts with postgresql://,
+    otherwise falls back to SQLite for local development or testing.
+
+    Args:
+        app: The Flask application instance to configure.
     """
     database_url = os.getenv('DATABASE_URL')
     if database_url and database_url.startswith('postgresql://'):
@@ -32,15 +35,19 @@ def configure_database(app):
 
 
 def setup_logging(app):
+    """Configure logging based on environment.
+
+    Development mode: Shows all logs (DEBUG level) to console.
+    Production/Staging mode: Only shows WARNING and above to console,
+    detailed error logs are written to file.
+
+    Args:
+        app: The Flask application instance to configure logging for.
     """
-    Configure logging based on environment.
-    - Development: Show all logs (DEBUG level) to console
-    - Production/Staging: Only show WARNING and above to console, log errors to file
-    """
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    flask_env = os.getenv('FLASK_ENV', 'development')
+    base_directory = os.path.abspath(os.path.dirname(__file__))
+    flask_environment = os.getenv('FLASK_ENV', 'development')
     
-    if flask_env == 'development':
+    if flask_environment == 'development':
         # Development: Verbose console logging
         app.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
@@ -64,11 +71,11 @@ def setup_logging(app):
         app.logger.addHandler(console_handler)
         
         # File handler: Log errors to file
-        log_dir = os.path.join(basedir, 'logs')
-        if not os.path.exists(log_dir):
-            os.mkdir(log_dir)
+        log_directory = os.path.join(base_directory, 'logs')
+        if not os.path.exists(log_directory):
+            os.mkdir(log_directory)
         file_handler = RotatingFileHandler(
-            os.path.join(log_dir, 'movieweb_app.log'),
+            os.path.join(log_directory, 'movieweb_app.log'),
             maxBytes=10240000,  # 10MB
             backupCount=10
         )

@@ -9,18 +9,29 @@ user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/users')
 def show_users():
-    """Shows all users in the system, handles exceptions"""
+    """Display all users in the system.
+
+    Returns:
+        Response: Rendered users template with list of users.
+    """
     try:
         users = data.get_all_users()
         message = "No users found." if not users else None
         return render_template('users.html', users=users, message=message)
-    except Exception as error:
-        return render_template("users.html", users=[], message=f"str( {error})")
+    except Exception as unexpected_error:
+        return render_template("users.html", users=[], message=str(unexpected_error))
 
 
 @user_bp.route('/add_user', methods=['GET', 'POST'])
 def add_user():
-    """Adds a user to the system, handles exceptions"""
+    """Add a new user to the system.
+
+    GET: Display the add user form.
+    POST: Process the form submission and create a new user.
+
+    Returns:
+        Response: Redirect to users list on success, or form with error message.
+    """
     if request.method == "POST":
         name = request.form.get('name').strip()
 
@@ -45,12 +56,12 @@ def add_user():
 
             data.add_user(name)
 
-        except ValueError as error:
-            return render_template("add_user.html", message=str(error))
-        except SQLAlchemyError as error:
-            return render_template("add_user.html", message=f"Database error: {str(error)}")
-        except Exception as error:
-            return render_template("add_user.html", message=f"Error: {str(error)}")
+        except ValueError as value_error:
+            return render_template("add_user.html", message=str(value_error))
+        except SQLAlchemyError as db_error:
+            return render_template("add_user.html", message=f"Database error: {str(db_error)}")
+        except Exception as unexpected_error:
+            return render_template("add_user.html", message=f"Error: {str(unexpected_error)}")
 
         return redirect(url_for('user.show_users'))
 
@@ -59,7 +70,14 @@ def add_user():
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 def user_movies(user_id):
-    """Shows the movies associated with a user, handles exceptions"""
+    """Display all movies associated with a specific user.
+
+    Args:
+        user_id: The unique identifier of the user.
+
+    Returns:
+        Response: Rendered user_movies template with user's movie collection.
+    """
     try:
         # Fetch user details
         user = data.get_user(user_id)
@@ -73,29 +91,39 @@ def user_movies(user_id):
         return render_template('user_movies.html',
                                user=user, movies=movies)
 
-    except ValueError as error:
+    except ValueError as value_error:
         return render_template("user_movies.html",
-                               user=None, movies=None, message=str(error))
-    except SQLAlchemyError as error:
+                               user=None, movies=None, message=str(value_error))
+    except SQLAlchemyError as db_error:
         return render_template("user_movies.html",
-                               user=None, movies=None, message=str(error))
-    except Exception as error:
+                               user=None, movies=None, message=str(db_error))
+    except Exception as unexpected_error:
         return render_template("user_movies.html",
-                               user=None, movies=None, message=str(error))
+                               user=None, movies=None, message=str(unexpected_error))
 
 
 @user_bp.route('/users/<int:user_id>/update_user', methods=['GET', 'POST'])
 def update_user(user_id):
-    """Updates a user's name in the system, handles exceptions"""
+    """Update a user's name in the system.
+
+    GET: Display the update user form.
+    POST: Process the form submission and update the user's name.
+
+    Args:
+        user_id: The unique identifier of the user to update.
+
+    Returns:
+        Response: Redirect to users list on success, or form with error message.
+    """
     if request.method == "POST":
         name = request.form.get("name").strip()
 
         # Get current user first (needed for template)
         try:
             current_user = data.get_user(user_id)
-        except ValueError as error:
+        except ValueError as value_error:
             return render_template("update_user.html",
-                                   user=None, user_id=user_id, message=str(error))
+                                   user=None, user_id=user_id, message=str(value_error))
 
         # Check if the name is provided
         if not name:
@@ -123,25 +151,25 @@ def update_user(user_id):
             except ValueError:
                 # User with that name doesn't exist, which is fine
                 pass
-            except SQLAlchemyError as error:
+            except SQLAlchemyError as db_error:
                 return render_template("update_user.html",
-                                       user=current_user, user_id=user_id, message=str(error))
-            except Exception as error:
+                                       user=current_user, user_id=user_id, message=str(db_error))
+            except Exception as unexpected_error:
                 return render_template("update_user.html",
-                                       user=current_user, user_id=user_id, message=str(error))
+                                       user=current_user, user_id=user_id, message=str(unexpected_error))
 
         try:
             # Update user details
             data.update_user(user_id=user_id, user_name=name)
-        except ValueError as error:
+        except ValueError as value_error:
             return render_template("update_user.html",
-                                   user=current_user, user_id=user_id, message=str(error))
-        except SQLAlchemyError as error:
+                                   user=current_user, user_id=user_id, message=str(value_error))
+        except SQLAlchemyError as db_error:
             return render_template("update_user.html",
-                                   user=current_user, user_id=user_id, message=str(error))
-        except Exception as error:
+                                   user=current_user, user_id=user_id, message=str(db_error))
+        except Exception as unexpected_error:
             return render_template("update_user.html",
-                                   user=current_user, user_id=user_id, message=str(error))
+                                   user=current_user, user_id=user_id, message=str(unexpected_error))
 
         # Redirect to users list after successful update
         return redirect(url_for('user.show_users'))
@@ -151,19 +179,26 @@ def update_user(user_id):
     except ValueError:
         return render_template('update_user.html',
                                user=None, user_id=user_id, message="User not found.")
-    except Exception as error:
+    except Exception as unexpected_error:
         return render_template('update_user.html',
-                               user=None, user_id=user_id, message=str(error))
+                               user=None, user_id=user_id, message=str(unexpected_error))
     return render_template('update_user.html', user=user, user_id=user_id)
 
 
 @user_bp.route('/users/<int:user_id>/delete_user', methods=['GET'])
 def delete_user(user_id):
-    """Delete a user from the system, handles exceptions."""
+    """Delete a user from the system.
+
+    Args:
+        user_id: The unique identifier of the user to delete.
+
+    Returns:
+        Response: Redirect to users list page.
+    """
     try:
         user_name = data.delete_user(user_id)
         return redirect(url_for('user.show_users'))
-    except ValueError as error:
+    except ValueError:
         return redirect(url_for('user.show_users'))
-    except Exception as error:
+    except Exception:
         return redirect(url_for('user.show_users'))

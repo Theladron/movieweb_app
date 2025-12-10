@@ -10,94 +10,121 @@ logger = logging.getLogger(__name__)
 
 
 class SQLiteDataManager(DataManagerInterface):
-    """
-    Imitates a data manager for a SQLite database.
+    """Data manager implementation for SQLite database operations.
+
+    Provides methods to interact with the database for users, movies,
+    and user-movie relationships.
 
     Attributes:
-        db (SQLAlchemy): SQLAlchemy instance
-        db_path (str): Path to the database file
-        """
+        db: SQLAlchemy database instance.
+        db_path: Path to the database file (set during initialization).
+    """
 
     def __init__(self):
-        """Initializes the SQLiteDataManager instance."""
+        """Initialize the SQLiteDataManager instance."""
         self.db = db
         self.db_path = None
 
     def init_app(self, app):
-        """Initializes the SQLiteDataManager instance with the provided Flask app."""
+        """Initialize the data manager with the Flask application.
+
+        Args:
+            app: The Flask application instance.
+        """
         self.db_path = app.config.get("SQLALCHEMY_DATABASE_URI", "sqlite:///movies.db")
 
-    def get_all_users(self):
-        """
-        Fetches all users from the database
-        :return: All users as a list if found, else an empty list
+    def get_all_users(self) -> list[User]:
+        """Fetch all users from the database.
+
+        Returns:
+            list[User]: List of all User objects, or empty list if error occurs.
         """
         try:
             return self.db.session.query(User).all()
-        except SQLAlchemyError as error:
-            logger.error(f"Error fetching users: {error}", exc_info=True)
+        except SQLAlchemyError as db_error:
+            logger.error(f"Error fetching users: {db_error}", exc_info=True)
             return []
 
-    def get_all_movies(self):
-        """
-        Fetches all movies from the database
-        :return: all movies as a list if found, else an empty list
+    def get_all_movies(self) -> list[Movie]:
+        """Fetch all movies from the database.
+
+        Returns:
+            list[Movie]: List of all Movie objects, or empty list if error occurs.
         """
         try:
             return self.db.session.query(Movie).all()
-        except SQLAlchemyError as error:
-            logger.error(f"Error fetching movies: {error}", exc_info=True)
+        except SQLAlchemyError as db_error:
+            logger.error(f"Error fetching movies: {db_error}", exc_info=True)
             return []
 
-    def get_user_movies(self, user_id):
-        """
-        Fetches all movies associated with a user from the database along with user_rating
-        :return: all movies with user_rating as a list of dictionaries if found, else an empty list
+    def get_user_movies(self, user_id: int) -> list[dict]:
+        """Fetch all movies associated with a user along with their user ratings.
+
+        Args:
+            user_id: The unique identifier of the user.
+
+        Returns:
+            list[dict]: List of dictionaries containing movie data and user ratings.
+                Each dictionary contains: id, title, release_year, poster, director,
+                rating (IMDB), and user_rating (personal). Returns empty list on error.
         """
         try:
-            results = (
+            query_results = (
                 self.db.session.query(Movie, UserMovies.user_rating)
                 .join(UserMovies, UserMovies.movie_id == Movie.id)
                 .filter(UserMovies.user_id == user_id)
                 .all()
             )
             # Convert to list of dictionaries with movie attributes and user_rating
-            movies = []
-            for movie, user_rating in results:
-                movie_dict = {
-                    'id': movie.id,
-                    'title': movie.title,
-                    'release_year': movie.release_year,
-                    'poster': movie.poster,
-                    'director': movie.director,
-                    'rating': movie.rating,  # Keep original IMDB rating
-                    'user_rating': user_rating  # User's personal rating
+            movies_list = []
+            for movie_obj, user_rating_value in query_results:
+                movie_data = {
+                    'id': movie_obj.id,
+                    'title': movie_obj.title,
+                    'release_year': movie_obj.release_year,
+                    'poster': movie_obj.poster,
+                    'director': movie_obj.director,
+                    'rating': movie_obj.rating,  # Keep original IMDB rating
+                    'user_rating': user_rating_value  # User's personal rating
                 }
-                movies.append(movie_dict)
-            return movies
-        except SQLAlchemyError as error:
-            logger.error(f"Error fetching user movies for user {user_id}: {error}", exc_info=True)
+                movies_list.append(movie_data)
+            return movies_list
+        except SQLAlchemyError as db_error:
+            logger.error(f"Error fetching user movies for user {user_id}: {db_error}", exc_info=True)
             return []
 
-    def get_user(self, user_id):
-        """
-        Fetches a user by ID from the database
-        :return: User object if found, else None
+    def get_user(self, user_id: int) -> User:
+        """Fetch a user by ID from the database.
+
+        Args:
+            user_id: The unique identifier of the user.
+
+        Returns:
+            User: The User object if found.
+
+        Raises:
+            ValueError: If user with the given ID is not found.
         """
         try:
-            user = (self.db.session.query(User).filter(User.id == user_id).one_or_none())
-            if not user:
+            user_obj = self.db.session.query(User).filter(User.id == user_id).one_or_none()
+            if not user_obj:
                 raise ValueError(f"No user found with ID {user_id}")
-            return user
-        except SQLAlchemyError as error:
+            return user_obj
+        except SQLAlchemyError as db_error:
             # Re-raise as ValueError for consistency
-            raise ValueError(f"No user found with ID {user_id}") from error
+            raise ValueError(f"No user found with ID {user_id}") from db_error
 
-    def add_user(self, user_name):
-        """
-        Adds a new user to the database
-        :param user_name: name of the user as string
-        :return: name of the user as string
+    def add_user(self, user_name: str) -> str:
+        """Add a new user to the database.
+
+        Args:
+            user_name: The name of the user to add.
+
+        Returns:
+            str: The name of the added user.
+
+        Raises:
+            ValueError: If user_name is empty or invalid.
         """
         if not user_name:
             raise ValueError("User name cannot be empty")
@@ -106,200 +133,249 @@ class SQLiteDataManager(DataManagerInterface):
         self.db.session.commit()
         return user_name
 
-    def update_user(self, user_id, user_name):
-        """
-        updates the name of a user
-        :param user_id: the id of the user as integer
-        :param user_name: the name of the user as string
-        :return: the updated name of the user if found, else an error message as string
+    def update_user(self, user_id: int, user_name: str) -> str:
+        """Update the name of an existing user.
+
+        Args:
+            user_id: The unique identifier of the user to update.
+            user_name: The new name for the user.
+
+        Returns:
+            str: Success message indicating the user was updated.
+
+        Raises:
+            ValueError: If user is not found or update fails.
         """
         try:
-            updated_user = self.get_user(user_id)
-            if not updated_user:
-                return f"User with ID {user_id} does not exist."
-
-            updated_user.name = user_name
+            # get_user raises ValueError if user not found
+            user_to_update = self.get_user(user_id)
+            user_to_update.name = user_name
             self.db.session.commit()
             return f"User '{user_name}' was updated successfully!"
 
-        except SQLAlchemyError as error:
+        except SQLAlchemyError as db_error:
             self.db.session.rollback()
-            raise ValueError(f"Could not update user with ID {user_id}; {error}")
+            raise ValueError(f"Could not update user with ID {user_id}; {db_error}")
 
-    def delete_user(self, user_id):
-        """
-        Deletes a user from the database
-        :param user_id: id of the user as integer
-        :return: name of the deleted user as string if found, else None
+    def delete_user(self, user_id: int) -> str:
+        """Delete a user from the database.
+
+        Also deletes associated user-movie links and removes movies that
+        are no longer associated with any users.
+
+        Args:
+            user_id: The unique identifier of the user to delete.
+
+        Returns:
+            str: The name of the deleted user.
+
+        Raises:
+            ValueError: If user is not found or deletion fails.
         """
         try:
             user_to_delete = self.get_user(user_id)
             if not user_to_delete:
-                return None
+                raise ValueError(f"No user found with ID {user_id}")
 
             # Get all movie IDs associated with the user
-            user_movies = self.db.session.query(UserMovies).filter_by(user_id=user_id).all()
-            movie_ids = [user_movie.movie_id for user_movie in user_movies]
+            user_movie_links = self.db.session.query(UserMovies).filter_by(user_id=user_id).all()
+            associated_movie_ids = [user_movie.movie_id for user_movie in user_movie_links]
 
             # Delete the user's entries in UserMovies
             self.db.session.query(UserMovies).filter_by(user_id=user_id).delete()
 
             # Delete the user
-            user_name = user_to_delete.name
+            deleted_user_name = user_to_delete.name
             self.db.session.delete(user_to_delete)
             self.db.session.commit()
 
-            for movie_id in movie_ids:
-                other_links = self.db.session.query(UserMovies).filter_by(movie_id=movie_id).first()
-                if not other_links:
+            # Delete movies that are no longer associated with any users
+            for movie_id in associated_movie_ids:
+                remaining_links = self.db.session.query(UserMovies).filter_by(movie_id=movie_id).first()
+                if not remaining_links:
                     self.db.session.query(Movie).filter_by(id=movie_id).delete()
 
             self.db.session.commit()
 
-            return user_name
+            return deleted_user_name
 
-        except SQLAlchemyError as error:
+        except SQLAlchemyError as db_error:
             self.db.session.rollback()
-            raise ValueError(f"Error occurred while deleting user with ID {user_id}: {error}")
+            raise ValueError(f"Error occurred while deleting user with ID {user_id}: {db_error}")
 
-    def get_user_by_name(self, user_name):
-        """
-        Gets a user by name
-        :param user_name: the name of the user as string
-        :return: user as User object
+    def get_user_by_name(self, user_name: str) -> User:
+        """Get a user by their name.
+
+        Args:
+            user_name: The name of the user to search for.
+
+        Returns:
+            User: The User object if found, None otherwise.
+
+        Raises:
+            SQLAlchemyError: If a database error occurs.
         """
         try:
-            user = self.db.session.query(User).filter(User.name == user_name).one_or_none()
-            return user
-        except SQLAlchemyError as error:
-            raise SQLAlchemyError(f"Error fetching user by name: {error}")
+            user_obj = self.db.session.query(User).filter(User.name == user_name).one_or_none()
+            return user_obj
+        except SQLAlchemyError as db_error:
+            raise SQLAlchemyError(f"Error fetching user by name: {db_error}") from db_error
 
-    def get_movie(self, movie_id):
-        """
-        Gets a movie object from the database by ID
-        :param movie_id: the id of the movie as integer
-        :return: movie as Movie object
+    def get_movie(self, movie_id: int) -> Movie:
+        """Get a movie object from the database by ID.
+
+        Args:
+            movie_id: The unique identifier of the movie.
+
+        Returns:
+            Movie: The Movie object if found.
+
+        Raises:
+            ValueError: If movie with the given ID is not found.
         """
         try:
-            movie = self.db.session.query(Movie).filter(Movie.id == movie_id).one_or_none()
-            if not movie:
+            movie_obj = self.db.session.query(Movie).filter(Movie.id == movie_id).one_or_none()
+            if not movie_obj:
                 raise ValueError(f"No movie found with ID {movie_id}")
-            return movie
-        except SQLAlchemyError as error:
+            return movie_obj
+        except SQLAlchemyError as db_error:
             # Re-raise as ValueError for consistency
-            raise ValueError(f"No movie found with ID {movie_id}") from error
+            raise ValueError(f"No movie found with ID {movie_id}") from db_error
 
-    def get_user_movie_rating(self, user_id, movie_id):
-        """
-        Gets the user's rating for a specific movie
-        :param user_id: the id of the user as integer
-        :param movie_id: the id of the movie as integer
-        :return: user_rating as float or None if not found
+    def get_user_movie_rating(self, user_id: int, movie_id: int) -> float | None:
+        """Get a user's rating for a specific movie.
+
+        Args:
+            user_id: The unique identifier of the user.
+            movie_id: The unique identifier of the movie.
+
+        Returns:
+            float: The user's rating for the movie, or None if not found.
+
+        Raises:
+            SQLAlchemyError: If a database error occurs.
         """
         try:
-            user_movie = (
+            user_movie_link = (
                 self.db.session.query(UserMovies)
                 .filter_by(user_id=user_id, movie_id=movie_id)
                 .first()
             )
-            return user_movie.user_rating if user_movie else None
-        except SQLAlchemyError as error:
-            raise SQLAlchemyError(f"Error fetching user movie rating: {error}")
+            return user_movie_link.user_rating if user_movie_link else None
+        except SQLAlchemyError as db_error:
+            raise SQLAlchemyError(f"Error fetching user movie rating: {db_error}") from db_error
 
-    def add_movie(self, user_id, title):
+    def add_movie(self, user_id: int, title: str) -> dict:
+        """Add a movie to a user's collection.
+
+        Fetches movie data from OMDb API and creates the movie if it doesn't exist.
+        Links the movie to the user with an initial rating.
+
+        Args:
+            user_id: The unique identifier of the user.
+            title: The title of the movie to add.
+
+        Returns:
+            dict: Dictionary with 'message' key ('added', 'linked', 'not_found') and 'movie' key.
+
+        Raises:
+            ValueError: If movie cannot be added due to validation or database errors.
         """
-        Adds a movie to the database
-        :param user_id: id of the user as integer
-        :param title: title of the movie as string
-        :return: status codes as dictionary
-        """
-        # Fetch movie data from OMDb
-        movie_data = fetch_movie_data(title)
-        if not movie_data:
+        # Fetch movie data from OMDb API
+        omdb_movie_data = fetch_movie_data(title)
+        if not omdb_movie_data:
             return {"message": "not_found", "movie": None}
 
-        title = movie_data.get('title')
-        director = movie_data.get('director', None)
-        rating = movie_data.get('rating', None)
-        poster = movie_data.get('poster', None)
-        release_year = movie_data.get('release_year', None)
+        # Extract movie information from API response
+        movie_title_from_api = omdb_movie_data.get('title')
+        movie_director = omdb_movie_data.get('director', None)
+        imdb_rating_value = omdb_movie_data.get('rating', None)
+        movie_poster_url = omdb_movie_data.get('poster', None)
+        movie_release_year = omdb_movie_data.get('release_year', None)
 
         # Check if the movie already exists in the database
         existing_movie = (
             self.db.session.query(Movie)
-            .filter_by(title=title, release_year=release_year)
+            .filter_by(title=movie_title_from_api, release_year=movie_release_year)
             .first()
         )
         if not existing_movie:
             # Create a new movie and add it to the database
             new_movie = Movie(
-                title=title,
-                release_year=release_year,
-                director=director,
-                rating=rating,
-                poster=poster,
+                title=movie_title_from_api,
+                release_year=movie_release_year,
+                director=movie_director,
+                rating=imdb_rating_value,
+                poster=movie_poster_url,
             )
             try:
                 self.db.session.add(new_movie)
                 self.db.session.commit()
                 existing_movie = new_movie
-            except SQLAlchemyError as error:
+            except SQLAlchemyError as db_error:
                 self.db.session.rollback()
-                raise ValueError(f"Error occurred while adding movie: {error}")
+                raise ValueError(f"Error occurred while adding movie: {db_error}")
 
         # Check if the movie is already linked to the user
-        user_movie = (
+        existing_user_movie_link = (
             self.db.session.query(UserMovies)
             .filter_by(user_id=user_id, movie_id=existing_movie.id)
             .first()
         )
-        if user_movie:
+        if existing_user_movie_link:
             return {"message": "linked", "movie": existing_movie}
 
         # Link the movie to the user with initial rating from the movie
         # Convert rating to float if it's a string
-        initial_rating = rating
-        if isinstance(rating, str):
+        initial_user_rating = imdb_rating_value
+        if isinstance(imdb_rating_value, str):
             try:
-                initial_rating = float(rating) if rating else None
+                initial_user_rating = float(imdb_rating_value) if imdb_rating_value else None
             except (ValueError, TypeError):
-                initial_rating = None
+                initial_user_rating = None
         
-        user_movie = UserMovies(
+        user_movie_link = UserMovies(
             user_id=user_id, 
             movie_id=existing_movie.id,
-            user_rating=initial_rating
+            user_rating=initial_user_rating
         )
         try:
-            self.db.session.add(user_movie)
+            self.db.session.add(user_movie_link)
             self.db.session.commit()
-        except SQLAlchemyError as error:
+        except SQLAlchemyError as db_error:
             self.db.session.rollback()
-            raise ValueError(f"Error occurred while linking movie to user: {error}")
+            raise ValueError(f"Error occurred while linking movie to user: {db_error}")
 
         return {"message": "added", "movie": existing_movie}
 
-    def delete_movie(self, user_id, movie_id):
-        """
-        Deletes a movie from the user's list. If no other users have the movie,
-        deletes the movie from the database entirely.
-        :param user_id: user id as integer
-        :param movie_id: movie id as integer
-        :return: the removed movie as Movie object if found, else None
+    def delete_movie(self, user_id: int, movie_id: int) -> Movie:
+        """Delete a movie from a user's collection.
+
+        If no other users have the movie, deletes it from the database entirely.
+
+        Args:
+            user_id: The unique identifier of the user.
+            movie_id: The unique identifier of the movie to remove.
+
+        Returns:
+            Movie: The deleted Movie object if found, None otherwise.
         """
         try:
             # Find the entry linking the user and movie
-            user_movie = self.db.session.query(UserMovies).filter_by(user_id=user_id,
-                                                                     movie_id=movie_id).first()
-            if not user_movie:
+            user_movie_link = (
+                self.db.session.query(UserMovies)
+                .filter_by(user_id=user_id, movie_id=movie_id)
+                .first()
+            )
+            if not user_movie_link:
                 return None
 
-            movie = self.db.session.query(Movie).filter_by(id=movie_id).first()
-            if not movie:
+            movie_obj = self.db.session.query(Movie).filter_by(id=movie_id).first()
+            if not movie_obj:
                 return None
 
             # Check if any other users have this movie before deleting the link
-            other_links_count = (
+            other_users_count = (
                 self.db.session.query(UserMovies)
                 .filter_by(movie_id=movie_id)
                 .filter(UserMovies.user_id != user_id)
@@ -307,45 +383,49 @@ class SQLiteDataManager(DataManagerInterface):
             )
 
             # Delete the user and movie relationship
-            self.db.session.delete(user_movie)
+            self.db.session.delete(user_movie_link)
 
             # Delete the movie if no other user is associated
-            if other_links_count == 0:
-                self.db.session.delete(movie)
+            if other_users_count == 0:
+                self.db.session.delete(movie_obj)
 
             self.db.session.commit()
-            return movie
+            return movie_obj
 
-        except SQLAlchemyError as e:
-            logger.error(f"Error deleting movie {movie_id} for user {user_id}: {e}", exc_info=True)
+        except SQLAlchemyError as db_error:
+            logger.error(f"Error deleting movie {movie_id} for user {user_id}: {db_error}", exc_info=True)
             self.db.session.rollback()
             return None
 
-    def update_movie(self, movie_id, user_id, rating=None):
-        """
-        Updates the user's rating for a movie in the linking table
-        :param movie_id: id of the movie as integer
-        :param user_id: id of the user as integer
-        :param rating: new user rating for the movie as float
+    def update_movie(self, movie_id: int, user_id: int, rating: float = None) -> None:
+        """Update a user's rating for a movie in the linking table.
+
+        Args:
+            movie_id: The unique identifier of the movie.
+            user_id: The unique identifier of the user.
+            rating: The new user rating for the movie (optional).
+
+        Raises:
+            ValueError: If user-movie link is not found or update fails.
         """
         try:
             # Find the linking entry for this user and movie first
-            user_movie = (
+            user_movie_link = (
                 self.db.session.query(UserMovies)
                 .filter_by(user_id=user_id, movie_id=movie_id)
                 .first()
             )
-            
-            if not user_movie:
+
+            if not user_movie_link:
                 raise ValueError(f"User has not added movie with ID {movie_id}.")
 
             # Update the user's rating in the linking table
             if rating is not None:
-                user_movie.user_rating = rating
+                user_movie_link.user_rating = rating
 
             self.db.session.commit()
 
-        except SQLAlchemyError as error:
-            logger.error(f"Error occurred while updating movie rating for user {user_id}: {error}", exc_info=True)
+        except SQLAlchemyError as db_error:
+            logger.error(f"Error occurred while updating movie rating for user {user_id}: {db_error}", exc_info=True)
             self.db.session.rollback()
-            raise ValueError(f"Error occurred while updating movie rating: {error}")
+            raise ValueError(f"Error occurred while updating movie rating: {db_error}")

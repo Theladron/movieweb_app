@@ -9,17 +9,31 @@ movie_bp = Blueprint('movie', __name__)
 
 @movie_bp.route('/movies')
 def show_movies():
-    """Shows all movies in the database. Handles exceptions."""
+    """Display all movies in the database.
+
+    Returns:
+        Response: Rendered movies template with list of all movies, or error response.
+    """
     try:
         movies = data.get_all_movies()
         return render_template('movies.html', movies=movies)
-    except Exception as error:
-        return jsonify({'error': str(error)}), 404
+    except Exception as unexpected_error:
+        return jsonify({'error': str(unexpected_error)}), 404
 
 
 @movie_bp.route('/users/<int:user_id>/add_movie', methods=['GET', 'POST'])
 def add_movie(user_id):
-    """Adds a movie to the user's list of movies. Handles exceptions."""
+    """Add a movie to a user's collection.
+
+    GET: Display the add movie form.
+    POST: Process the form submission and add the movie to the user's collection.
+
+    Args:
+        user_id: The unique identifier of the user.
+
+    Returns:
+        Response: Form template with success/error message, or error if user not found.
+    """
     try:
         user = data.get_user(user_id)
     except (ValueError, sqlalchemy.exc.NoResultFound):
@@ -48,28 +62,39 @@ def add_movie(user_id):
                 return render_template('add_movie.html', user=user, user_id=user_id,
                                        message=f"Movie '{title}' added successfully!")
 
-        except sqlalchemy.exc.IntegrityError as e:
+        except sqlalchemy.exc.IntegrityError as db_error:
             return render_template('add_movie.html', user=user, user_id=user_id,
-                                   message=f"Database constraint violated: {str(e)}")
+                                   message=f"Database constraint violated: {str(db_error)}")
 
-        except sqlalchemy.exc.SQLAlchemyError as e:
+        except sqlalchemy.exc.SQLAlchemyError as db_error:
             return render_template('add_movie.html', user=user, user_id=user_id,
-                                   message=f"An unexpected database error occurred: {str(e)}")
+                                   message=f"An unexpected database error occurred: {str(db_error)}")
 
-        except ValueError as e:
+        except ValueError as value_error:
             return render_template('add_movie.html', user=user, user_id=user_id,
-                                   message=f"A database error occurred: {str(e)}")
+                                   message=f"A database error occurred: {str(value_error)}")
 
-        except Exception as e:
+        except Exception as unexpected_error:
             return render_template('add_movie.html', user=user, user_id=user_id,
-                                   message=f"An unexpected error occurred: {str(e)}")
+                                   message=f"An unexpected error occurred: {str(unexpected_error)}")
 
     return render_template('add_movie.html', user=user, user_id=user_id)
 
 
 @movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
-    """Updates the user's rating for a movie. Handles exceptions."""
+    """Update a user's rating for a movie.
+
+    GET: Display the update movie rating form.
+    POST: Process the form submission and update the user's rating.
+
+    Args:
+        user_id: The unique identifier of the user.
+        movie_id: The unique identifier of the movie.
+
+    Returns:
+        Response: Rendered update_movie template with success/error message.
+    """
     try:
         movie = data.get_movie(movie_id)
         # Get the current user_rating for this user-movie combination
@@ -77,23 +102,23 @@ def update_movie(user_id, movie_id):
     except sqlalchemy.exc.NoResultFound:
         return render_template('update_movie.html', movie=None,
                                message="Movie not found.")
-    except ValueError as error:
+    except ValueError as value_error:
         return render_template('update_movie.html', movie=None,
-                               message=str(error))
+                               message=str(value_error))
     
     if request.method == "POST":
-        custom_rating = request.form.get('rating').strip()
-        if not custom_rating:
+        user_rating_input = request.form.get('rating', '').strip()
+        if not user_rating_input:
             return render_template('update_movie.html', movie=movie,
                                    user_id=user_id, user_rating=current_user_rating,
                                    message="Rating is required.")
 
         try:
             # Check if the rating is a valid float
-            custom_rating = float(custom_rating)
+            user_rating_float = float(user_rating_input)
 
-            # Log rating range validation
-            if not (0 <= custom_rating <= 10):
+            # Validate rating range
+            if not (0 <= user_rating_float <= 10):
                 warning_message = "Rating must be between 0 and 10."
                 return render_template('update_movie.html', movie=movie,
                                        warning_message=warning_message, 
@@ -105,18 +130,18 @@ def update_movie(user_id, movie_id):
                                             "a valid number between 0 and 10.")
 
         try:
-            data.update_movie(movie_id=movie_id, user_id=user_id, rating=custom_rating)
+            data.update_movie(movie_id=movie_id, user_id=user_id, rating=user_rating_float)
             # Update current_user_rating after successful update
-            current_user_rating = custom_rating
-        except ValueError as error:
+            current_user_rating = user_rating_float
+        except ValueError as value_error:
             return render_template('update_movie.html', movie=movie,
                                    user_id=user_id, user_rating=current_user_rating,
-                                   message=str(error))
-        except Exception as error:
+                                   message=str(value_error))
+        except Exception as unexpected_error:
             return render_template('update_movie.html', movie=movie,
                                    user_id=user_id, user_rating=current_user_rating,
                                    message=f"An error occurred while "
-                                            f"updating the movie: {str(error)}.")
+                                            f"updating the movie: {str(unexpected_error)}.")
 
         return render_template('update_movie.html', movie=movie,
                                user_id=user_id, user_rating=current_user_rating,
@@ -128,10 +153,16 @@ def update_movie(user_id, movie_id):
 
 @movie_bp.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['GET'])
 def delete_movie(user_id, movie_id):
-    """
-    Deletes a movie from the user's list of movies.
-    Once no user has the movie in their list,
-    deletes the movie entirely. Handles exceptions.
+    """Delete a movie from a user's collection.
+
+    If no other users have the movie, deletes it from the database entirely.
+
+    Args:
+        user_id: The unique identifier of the user.
+        movie_id: The unique identifier of the movie to delete.
+
+    Returns:
+        Response: Redirect to user's movies page with success/error message.
     """
     try:
         movie_to_delete = data.delete_movie(user_id, movie_id)
@@ -141,6 +172,6 @@ def delete_movie(user_id, movie_id):
 
         return redirect(url_for('user.user_movies', user_id=user_id,
                                 message="Movie deleted successfully."))
-    except Exception as error:
+    except Exception as unexpected_error:
         return redirect(url_for('user.user_movies', user_id=user_id,
-                                message=f"An error occurred: {str(error)}"))
+                                message=f"An error occurred: {str(unexpected_error)}"))

@@ -5,7 +5,11 @@ from .errors import errors_bp
 from .api import api_bp
 
 def register_blueprints(app):
-    """Registers the blueprints for the main, movie, user, errors, and API routes."""
+    """Register all Flask blueprints with the application.
+
+    Args:
+        app: The Flask application instance to register blueprints with.
+    """
     app.register_blueprint(main_bp)
     app.register_blueprint(movie_bp)
     app.register_blueprint(user_bp)

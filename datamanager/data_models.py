@@ -2,12 +2,12 @@ from extensions import db
 
 
 class User(db.Model):
-    """
-    Represents a user in the database.
+    """Represents a user in the database.
 
     Attributes:
-        id (int): The unique identifier for the user.
-        name (str): The name of the user.
+        id: The unique identifier for the user.
+        name: The name of the user.
+        user_movies: Relationship to UserMovies linking table.
     """
     __tablename__ = 'user'
 
@@ -27,12 +27,14 @@ class Movie(db.Model):
     """Represents a movie in the database.
 
     Attributes:
-        id (int): The unique identifier for the movie.
-        title (str): The title of the movie.
-        release_year (int): The release year of the movie.
-        poster (str): The URL of the movie poster.
-        director (str): The director of the movie.
-        rating (float): The rating of the movie."""
+        id: The unique identifier for the movie.
+        title: The title of the movie.
+        release_year: The release year of the movie.
+        poster: The URL of the movie poster.
+        director: The director of the movie.
+        rating: The IMDB rating of the movie.
+        user_movies: Relationship to UserMovies linking table.
+    """
     __tablename__ = 'movie'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -53,13 +55,16 @@ class Movie(db.Model):
 
 
 class UserMovies(db.Model):
-    """The connection table between users and movies.
+    """Linking table connecting users and movies with personal ratings.
 
     Attributes:
-        id (int): The unique identifier for the connection.
-        user_id(int): The id of the user.
-        movie_id (int): The id of the movie.
-        user_rating (float): The user's personal rating for the movie."""
+        id: The unique identifier for the connection.
+        user_id: The unique identifier of the user.
+        movie_id: The unique identifier of the movie.
+        user_rating: The user's personal rating for the movie (can be None).
+        user: Relationship to User model.
+        movie: Relationship to Movie model.
+    """
     __tablename__ = 'user_movies'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

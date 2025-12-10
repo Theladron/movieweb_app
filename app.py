@@ -12,16 +12,21 @@ load_dotenv()
 
 
 def create_app():
-    """
-    Creates and configures the Flask application and registers blueprints.
-    Database schema is handled by Alembic migrations (Docker/PostgreSQL) 
+    """Create and configure the Flask application.
+
+    Creates Flask app instance, configures database connection and logging,
+    initializes extensions, and registers all blueprints.
+    Database schema is handled by Alembic migrations (Docker/PostgreSQL)
     or created automatically in tests (temporary SQLite databases).
+
+    Returns:
+        Flask: Configured Flask application instance.
     """
     # Get the base directory
-    basedir = os.path.abspath(os.path.dirname(__file__))
+    base_directory = os.path.abspath(os.path.dirname(__file__))
     # Explicitly set static folder path
-    static_folder = os.path.join(basedir, 'static')
-    app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
+    static_folder_path = os.path.join(base_directory, 'static')
+    app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 
     # Configure database connection
     configure_database(app)

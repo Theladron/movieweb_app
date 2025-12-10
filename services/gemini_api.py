@@ -19,12 +19,16 @@ if GEMINI_AVAILABLE and GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
 
-def get_similar_movies(movie_title):
-    """
-    Get AI-powered movie recommendations based on a movie title.
-    
-    :param movie_title: Title of the movie to find similar movies for
-    :return: List of recommended movie titles, or None if error occurred
+def get_similar_movies(movie_title: str) -> list[str] | None:
+    """Get AI-powered movie recommendations based on a movie title.
+
+    Uses Google Gemini API to generate similar movie recommendations.
+
+    Args:
+        movie_title: The title of the movie to find similar movies for.
+
+    Returns:
+        list[str] | None: List of recommended movie titles, or None if error occurred.
     """
     if not GEMINI_AVAILABLE:
         logger.error("google-generativeai package not installed")
@@ -65,16 +69,16 @@ Return the movies as a JSON array only."""
         # Try to parse as JSON first
         try:
             # Clean up response - remove markdown code blocks if present
-            cleaned_text = response_text
-            if '```json' in cleaned_text:
-                cleaned_text = cleaned_text.split('```json')[1].split('```')[0].strip()
-            elif '```' in cleaned_text:
-                cleaned_text = cleaned_text.split('```')[1].split('```')[0].strip()
+            cleaned_response_text = response_text
+            if '```json' in cleaned_response_text:
+                cleaned_response_text = cleaned_response_text.split('```json')[1].split('```')[0].strip()
+            elif '```' in cleaned_response_text:
+                cleaned_response_text = cleaned_response_text.split('```')[1].split('```')[0].strip()
             
-            movies = json.loads(cleaned_text)
-            if isinstance(movies, list) and len(movies) > 0:
-                logger.info(f"Successfully got {len(movies)} recommendations for '{movie_title}'")
-                return movies
+            recommendations_list = json.loads(cleaned_response_text)
+            if isinstance(recommendations_list, list) and len(recommendations_list) > 0:
+                logger.info(f"Successfully got {len(recommendations_list)} recommendations for '{movie_title}'")
+                return recommendations_list
             else:
                 logger.warning(f"Empty or invalid movie list returned for '{movie_title}'")
                 return None
@@ -82,59 +86,62 @@ Return the movies as a JSON array only."""
         except json.JSONDecodeError:
             # If JSON parsing fails, try to extract movie titles from text
             logger.warning(f"Failed to parse JSON response for '{movie_title}', attempting text extraction")
-            movies = _extract_movies_from_text(response_text)
-            if movies:
-                logger.info(f"Successfully extracted {len(movies)} recommendations from text for '{movie_title}'")
-                return movies
+            extracted_movies = _extract_movies_from_text(response_text)
+            if extracted_movies:
+                logger.info(f"Successfully extracted {len(extracted_movies)} recommendations from text for '{movie_title}'")
+                return extracted_movies
             else:
                 logger.error(f"Could not extract movie titles from response for '{movie_title}'")
                 return None
             
-    except Exception as error:
-        error_str = str(error)
+    except Exception as api_error:
+        error_message = str(api_error)
         # Check for quota/rate limit errors
-        if "429" in error_str or "quota" in error_str.lower() or "ResourceExhausted" in error_str:
-            logger.warning(f"Quota/rate limit exceeded for '{movie_title}': {error_str[:200]}")
+        if "429" in error_message or "quota" in error_message.lower() or "ResourceExhausted" in error_message:
+            logger.warning(f"Quota/rate limit exceeded for '{movie_title}': {error_message[:200]}")
             # Try to extract retry delay if available
-            if "retry in" in error_str.lower():
+            if "retry in" in error_message.lower():
                 logger.info("Please wait before retrying the request.")
         else:
-            logger.error(f"Error getting movie recommendations for '{movie_title}': {error}", exc_info=True)
+            logger.error(f"Error getting movie recommendations for '{movie_title}': {api_error}", exc_info=True)
         return None
 
 
-def _extract_movies_from_text(text):
+def _extract_movies_from_text(text: str) -> list[str] | None:
+    """Extract movie titles from text response (fallback method).
+
+    Tries to find quoted strings or numbered list items when JSON parsing fails.
+
+    Args:
+        text: Raw text response from the AI API.
+
+    Returns:
+        list[str]: List of extracted movie titles (up to 5), or None if none found.
     """
-    Fallback method to extract movie titles from text response.
-    Tries to find quoted strings or numbered list items.
-    
-    :param text: Text response from AI
-    :return: List of movie titles or None
-    """
-    movies = []
+    extracted_titles = []
     
     # Try to find quoted strings (common in AI responses)
     quoted_pattern = r'"([^"]+)"'
     quoted_matches = re.findall(quoted_pattern, text)
     if quoted_matches:
-        movies.extend(quoted_matches)
+        extracted_titles.extend(quoted_matches)
     
     # Try to find numbered list items (1. Movie Title)
     numbered_pattern = r'\d+\.\s*([^\n]+)'
     numbered_matches = re.findall(numbered_pattern, text)
     if numbered_matches:
         # Only add if we didn't find quoted strings, or if we need more movies
-        if not movies or len(movies) < 3:
-            movies.extend([m.strip() for m in numbered_matches[:5]])
+        if not extracted_titles or len(extracted_titles) < 3:
+            extracted_titles.extend([match.strip() for match in numbered_matches[:5]])
     
     # Remove duplicates while preserving order
-    seen = set()
-    unique_movies = []
-    for movie in movies:
-        movie_clean = movie.strip().strip('"').strip("'")
-        if movie_clean and movie_clean.lower() not in seen:
-            seen.add(movie_clean.lower())
-            unique_movies.append(movie_clean)
+    seen_titles = set()
+    unique_titles = []
+    for title in extracted_titles:
+        cleaned_title = title.strip().strip('"').strip("'")
+        if cleaned_title and cleaned_title.lower() not in seen_titles:
+            seen_titles.add(cleaned_title.lower())
+            unique_titles.append(cleaned_title)
     
-    return unique_movies[:5] if unique_movies else None
+    return unique_titles[:5] if unique_titles else None
 
