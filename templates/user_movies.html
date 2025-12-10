@@ -28,8 +28,8 @@
                         <h3 class="movie_title">{{ movie.title }}</h3>
                         <p class="movie_year"><strong>Release year:</strong> <span class="year">{{ movie.release_year }}</span></p>
                         <div class="movie_rating">
-                            <strong>IMBd Rating:</strong>
-                            <span>⭐ {{ movie.rating }}</span>
+                            <strong>Your Rating:</strong>
+                            <span>⭐ {% if movie.user_rating is not none %}{{ movie.user_rating }}{% else %}{{ movie.rating }}{% endif %}</span>
                         </div>
                         <p class="movie_director"><strong>Director:</strong> <span class="name">{{ movie.director }}</span></p>
                     </div>

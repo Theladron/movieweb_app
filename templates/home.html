@@ -4,8 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>MovieWeb App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>MovieWeb App - Your Personal Movie Library</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" type="text/css">
+    <style>
+        /* Critical inline CSS for immediate render - hover effects come from external CSS */
+        .home-cards { display: flex !important; justify-content: center !important; align-items: flex-start !important; gap: 2rem !important; }
+        .home-card { width: 220px !important; max-width: 220px !important; display: flex !important; flex-direction: column !important; align-items: center !important; text-align: center !important; background: rgba(244, 208, 63, 0.4) !important; border: 2px solid rgba(244, 208, 63, 0.6) !important; border-radius: 24px !important; padding: 1.5rem !important; cursor: pointer !important; }
+        .home-card-icon, .home-card h3 { text-align: center !important; }
+        .home-card-inner { background: rgba(255, 255, 255, 0.5) !important; border-radius: 16px !important; padding: 1.25rem !important; text-align: center !important; margin-top: 1rem !important; width: 100% !important; }
+    </style>
+    <script>
+        // Ensure CSS is fully loaded before allowing interaction
+        (function() {
+            var stylesheet = document.querySelector('link[rel="stylesheet"]');
+            if (stylesheet) {
+                // Check if CSS is already loaded
+                if (stylesheet.sheet) {
+                    document.documentElement.classList.add('css-loaded');
+                } else {
+                    // Wait for CSS to load
+                    stylesheet.addEventListener('load', function() {
+                        document.documentElement.classList.add('css-loaded');
+                    });
+                }
+            }
+        })();
+    </script>
 </head>
 <body class="home">
     <nav>
@@ -15,12 +39,44 @@
     </nav>
     <div class="content">
         <h1 class="title">MovieWeb App</h1>
+        <div class="description">
+            <p>Welcome to your personal Movie Library!</p>
+            <p>Discover, organize, and rate your favorite films</p>
+        </div>
     </div>
-    <div class="description">
-        <p>Welcome to your personal Movie Library!</p>
-        <p>Create a Username and Start Adding Movies</p>
-        <p>Rate the movies to your liking and most important of all:</p>
-        <p>Have fun!</p>
+
+    <div class="home-cards">
+        <div class="home-card">
+            <div class="home-card-icon">👤</div>
+            <h3>Create Your Profile</h3>
+            <div class="home-card-inner">
+                <p>Start by creating a username and building your personal movie collection. Each user has their own unique library and ratings.</p>
+            </div>
+        </div>
+        <div class="home-card">
+            <div class="home-card-icon">🎬</div>
+            <h3>Add Movies</h3>
+            <div class="home-card-inner">
+                <p>Search and add movies to your collection. Get instant access to movie details including ratings, directors, and release years.</p>
+            </div>
+        </div>
+        <div class="home-card">
+            <div class="home-card-icon">⭐</div>
+            <h3>Rate & Review</h3>
+            <div class="home-card-inner">
+                <p>Rate movies to your liking and keep track of your favorites. Your ratings are personal and separate from other users.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 3rem 0;">
+        <a href="/users" class="cta-button">Get Started →</a>
+    </div>
+
+    <div class="description" style="margin-top: 4rem;">
+        <p style="font-size: 1.6rem; font-weight: 600; color: var(--yellow-dark);">Ready to build your movie collection?</p>
+        <p style="font-size: 1.2rem; opacity: 0.9;">Create a username and start adding movies to your personal library today!</p>
+        <p style="font-size: 1.1rem; margin-top: 1.5rem; font-style: italic; opacity: 0.8;">Most importantly - have fun exploring cinema! 🎥✨</p>
     </div>
 </body>
 </html>

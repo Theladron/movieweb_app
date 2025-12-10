@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Add Movie</title>
+    <title>Add Movie - {{ user.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="add_movie">
@@ -13,14 +13,30 @@
         <a href="/movies"><button>Movies</button></a>
         <a href="/users"><button>Users</button></a>
     </nav>
-    <h1 class="title">{{ user.name }}'sMovies</h1>
-    <form action="/users/{{ user.id }}/add_movie" method="POST" class="form">
-        <label for="title">Please enter a movie title</label>
-        <input type="text" id="title" name="title" required><br><br>
-        <input type="submit" value="Add Movie">
+    <div class="user_title">
+        <h1 class="title">{{ user.name }}'s Movies</h1>
+        <p class="subtitle">Add a new movie to your collection</p>
+    </div>
+    
+    <form action="/users/{{ user.id }}/add_movie" method="POST" class="styled-form">
+        <label for="title">🎬 Movie Title</label>
+        <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            placeholder="Enter the movie title..."
+            required
+            autofocus
+        >
+        <input type="submit" value="Search & Add Movie">
     </form>
+    
     {% if message %}
-    <p class="alert-message">{{ message }}</p>
+    <p class="alert-message {% if 'successfully' in message or 'added' in message.lower() %}success{% endif %}">{{ message }}</p>
     {% endif %}
-  </body>
+    
+    <div style="text-align: center; margin: 2rem 0;">
+        <a href="{{ url_for('user.user_movies', user_id=user.id) }}" class="add-user-btn">← Back to My Movies</a>
+    </div>
+</body>
 </html>

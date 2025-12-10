@@ -48,16 +48,29 @@ class SQLiteDataManager(DataManagerInterface):
 
     def get_user_movies(self, user_id):
         """
-        Fetches all movies associated with a user from the database
-        :return: all movies as a list if found, else an empty list
+        Fetches all movies associated with a user from the database along with user_rating
+        :return: all movies with user_rating as a list of dictionaries if found, else an empty list
         """
         try:
-            movies = (
-                self.db.session.query(Movie)
+            results = (
+                self.db.session.query(Movie, UserMovies.user_rating)
                 .join(UserMovies, UserMovies.movie_id == Movie.id)
                 .filter(UserMovies.user_id == user_id)
                 .all()
             )
+            # Convert to list of dictionaries with movie attributes and user_rating
+            movies = []
+            for movie, user_rating in results:
+                movie_dict = {
+                    'id': movie.id,
+                    'title': movie.title,
+                    'release_year': movie.release_year,
+                    'poster': movie.poster,
+                    'director': movie.director,
+                    'rating': movie.rating,  # Keep original IMDB rating
+                    'user_rating': user_rating  # User's personal rating
+                }
+                movies.append(movie_dict)
             return movies
         except SQLAlchemyError as error:
             print(f"Error fetching user movies: {error}")
@@ -172,6 +185,23 @@ class SQLiteDataManager(DataManagerInterface):
         except SQLAlchemyError as error:
             raise SQLAlchemyError(f"Error fetching movie with ID {movie_id}: {error}")
 
+    def get_user_movie_rating(self, user_id, movie_id):
+        """
+        Gets the user's rating for a specific movie
+        :param user_id: the id of the user as integer
+        :param movie_id: the id of the movie as integer
+        :return: user_rating as float or None if not found
+        """
+        try:
+            user_movie = (
+                self.db.session.query(UserMovies)
+                .filter_by(user_id=user_id, movie_id=movie_id)
+                .first()
+            )
+            return user_movie.user_rating if user_movie else None
+        except SQLAlchemyError as error:
+            raise SQLAlchemyError(f"Error fetching user movie rating: {error}")
+
     def add_movie(self, user_id, title):
         """
         Adds a movie to the database
@@ -222,8 +252,20 @@ class SQLiteDataManager(DataManagerInterface):
         if user_movie:
             return {"message": "linked", "movie": existing_movie}
 
-        # Link the movie to the user
-        user_movie = UserMovies(user_id=user_id, movie_id=existing_movie.id)
+        # Link the movie to the user with initial rating from the movie
+        # Convert rating to float if it's a string
+        initial_rating = rating
+        if isinstance(rating, str):
+            try:
+                initial_rating = float(rating) if rating else None
+            except (ValueError, TypeError):
+                initial_rating = None
+        
+        user_movie = UserMovies(
+            user_id=user_id, 
+            movie_id=existing_movie.id,
+            user_rating=initial_rating
+        )
         try:
             self.db.session.add(user_movie)
             self.db.session.commit()
@@ -235,7 +277,8 @@ class SQLiteDataManager(DataManagerInterface):
 
     def delete_movie(self, user_id, movie_id):
         """
-        Deletes a movie from the database
+        Deletes a movie from the user's list. If no other users have the movie,
+        deletes the movie from the database entirely.
         :param user_id: user id as integer
         :param movie_id: movie id as integer
         :return: the removed movie as Movie object if found, else None
@@ -251,11 +294,19 @@ class SQLiteDataManager(DataManagerInterface):
             if not movie:
                 return None
 
+            # Check if any other users have this movie before deleting the link
+            other_links_count = (
+                self.db.session.query(UserMovies)
+                .filter_by(movie_id=movie_id)
+                .filter(UserMovies.user_id != user_id)
+                .count()
+            )
+
             # Delete the user and movie relationship
             self.db.session.delete(user_movie)
 
             # Delete the movie if no other user is associated
-            if not self.db.session.query(UserMovies).filter_by(movie_id=movie_id).first():
+            if other_links_count == 0:
                 self.db.session.delete(movie)
 
             self.db.session.commit()
@@ -268,22 +319,34 @@ class SQLiteDataManager(DataManagerInterface):
 
     def update_movie(self, movie_id, user_id, rating=None):
         """
-        Updates the rating of a movie
+        Updates the user's rating for a movie in the linking table
         :param movie_id: id of the movie as integer
         :param user_id: id of the user as integer
-        :param rating: new rating of the movie as float
+        :param rating: new user rating for the movie as float
         """
         try:
+            # Verify the movie exists
             movie_to_update = self.get_movie(movie_id)
             if not movie_to_update:
                 raise ValueError(f"Movie with ID {movie_id} does not exist.")
 
-            # Update the rating if provided
-            movie_to_update.rating = rating or movie_to_update.rating
+            # Find the linking entry for this user and movie
+            user_movie = (
+                self.db.session.query(UserMovies)
+                .filter_by(user_id=user_id, movie_id=movie_id)
+                .first()
+            )
+            
+            if not user_movie:
+                raise ValueError(f"Movie with ID {movie_id} is not linked to user with ID {user_id}.")
+
+            # Update the user's rating in the linking table
+            if rating is not None:
+                user_movie.user_rating = rating
 
             self.db.session.commit()
 
         except SQLAlchemyError as error:
-            print(f"Error occurred while updating movie with ID {movie_id}: {error}")
+            print(f"Error occurred while updating movie rating for user {user_id}: {error}")
             self.db.session.rollback()
-            raise None
+            raise ValueError(f"Error occurred while updating movie rating: {error}")

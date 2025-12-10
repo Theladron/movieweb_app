@@ -69,17 +69,24 @@ def add_movie(user_id):
 
 @movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
-    """Updates the rating of a movie. Handles exceptions."""
+    """Updates the user's rating for a movie. Handles exceptions."""
     try:
         movie = data.get_movie(movie_id)
+        # Get the current user_rating for this user-movie combination
+        current_user_rating = data.get_user_movie_rating(user_id, movie_id)
     except sqlalchemy.exc.NoResultFound:
         return render_template('update_movie.html', movie=None,
                                message="Movie not found.")
+    except ValueError as error:
+        return render_template('update_movie.html', movie=None,
+                               message=str(error))
+    
     if request.method == "POST":
         custom_rating = request.form.get('rating').strip()
         if not custom_rating:
             return render_template('update_movie.html', movie=movie,
-                                   user_id=user_id, message="Rating is required.")
+                                   user_id=user_id, user_rating=current_user_rating,
+                                   message="Rating is required.")
 
         try:
             # Check if the rating is a valid float
@@ -89,26 +96,34 @@ def update_movie(user_id, movie_id):
             if not (0 <= custom_rating <= 10):
                 warning_message = "Rating must be between 0 and 10."
                 return render_template('update_movie.html', movie=movie,
-                                       warning_message=warning_message, user_id=user_id)
+                                       warning_message=warning_message, 
+                                       user_id=user_id, user_rating=current_user_rating)
         except ValueError:
             return render_template('update_movie.html', movie=movie,
-                                   user_id=user_id, message="Invalid rating. Please enter "
-                                                            "a valid number between 0 and 10.")
+                                   user_id=user_id, user_rating=current_user_rating,
+                                   message="Invalid rating. Please enter "
+                                            "a valid number between 0 and 10.")
 
         try:
             data.update_movie(movie_id=movie_id, user_id=user_id, rating=custom_rating)
+            # Update current_user_rating after successful update
+            current_user_rating = custom_rating
         except ValueError as error:
             return render_template('update_movie.html', movie=movie,
-                                   user_id=user_id, message=str(error))
+                                   user_id=user_id, user_rating=current_user_rating,
+                                   message=str(error))
         except Exception as error:
             return render_template('update_movie.html', movie=movie,
-                                   user_id=user_id, message=f"An error occurred while "
-                                                            f"updating the movie: {str(error)}.")
+                                   user_id=user_id, user_rating=current_user_rating,
+                                   message=f"An error occurred while "
+                                            f"updating the movie: {str(error)}.")
 
         return render_template('update_movie.html', movie=movie,
-                               user_id=user_id, message="Rating updated successfully!")
+                               user_id=user_id, user_rating=current_user_rating,
+                               message="Rating updated successfully!")
 
-    return render_template('update_movie.html', movie=movie, user_id=user_id)
+    return render_template('update_movie.html', movie=movie, user_id=user_id, 
+                          user_rating=current_user_rating)
 
 
 @movie_bp.route('/users/<int:user_id>/delete_movie/<int:movie_id>', methods=['GET'])

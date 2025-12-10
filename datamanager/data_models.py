@@ -60,15 +60,17 @@ class UserMovies(db.Model):
     Attributes:
         id (int): The unique identifier for the connection.
         user_id(int): The id of the user.
-        movie_id (int): The id of the movie."""
+        movie_id (int): The id of the movie.
+        user_rating (float): The user's personal rating for the movie."""
     __tablename__ = 'user_movies'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+    user_rating = db.Column(db.Float, nullable=True)
 
     user = db.relationship('User', back_populates='user_movies')
     movie = db.relationship('Movie', back_populates='user_movies')
 
     def __repr__(self):
-        return f'UserMovies(id = {self.id}, user_id = {self.user_id}, movie_id = {self.movie_id})'
+        return f'UserMovies(id = {self.id}, user_id = {self.user_id}, movie_id = {self.movie_id}, user_rating = {self.user_rating})'

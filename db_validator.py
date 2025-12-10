@@ -3,16 +3,25 @@ import sys
 
 from sqlalchemy import inspect
 
-from datamanager.sqlite_data_manager import db
+from extensions import db
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 def validate_database(app):
     """
-    Validates the database by checking the file path and file itself. Exits the program and links
-    to the setup file if filepath or database missing / corrupt
+    Validates the database by checking the file path and file itself. 
+    Only runs for SQLite databases. For PostgreSQL, migrations are handled by Alembic.
+    Exits the program and links to the setup file if filepath or database missing / corrupt
     """
+    database_url = os.getenv('DATABASE_URL', '')
+    
+    # Skip validation for PostgreSQL (Alembic handles migrations)
+    if database_url and 'postgresql' in database_url.lower():
+        print("✅ Using PostgreSQL database. Migrations handled by Alembic.")
+        return
+    
+    # SQLite validation
     db_path = os.path.join(basedir, 'data', 'movies.db')
 
     if not os.path.isfile(db_path):
@@ -25,7 +34,7 @@ def validate_database(app):
         expected_tables = {
             'user': {'id', 'name'},
             'movie': {'id', 'title', 'release_year', 'poster', 'director', 'rating'},
-            'user_movies': {'id', 'user_id', 'movie_id'},
+            'user_movies': {'id', 'user_id', 'movie_id', 'user_rating'},
         }
 
         actual_tables = set(inspector.get_table_names())

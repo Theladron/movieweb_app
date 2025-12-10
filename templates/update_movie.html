@@ -21,7 +21,7 @@
             type="text"
             id="rating"
             name="rating"
-            value="{{ movie.rating }}"
+            value="{% if user_rating is not none %}{{ user_rating }}{% else %}{{ movie.rating }}{% endif %}"
             placeholder="Enter movie rating"
             required
         ><br><br>
