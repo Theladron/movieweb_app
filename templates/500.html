@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>500 - Internal Server Error</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="/"><button>Home</button></a>
+        <a href="/movies"><button>Movies</button></a>
+        <a href="/users"><button>Users</button></a>
+    </nav>
+    <div class="content" style="text-align: center; padding: 4rem 2rem;">
+        <h1 class="title" style="font-size: 8rem; margin: 2rem 0;">500</h1>
+        <div class="description">
+            <p style="font-size: 1.8rem; margin: 1rem 0;">Internal Server Error</p>
+            <p style="font-size: 1.2rem; margin: 1rem 0;">Something went wrong on our end. Please try again later.</p>
+        </div>
+        <div style="margin-top: 3rem;">
+            <a href="/"><button style="font-size: 1.2rem; padding: 1rem 2rem;">Go Home</button></a>
+        </div>
+    </div>
+</body>
+</html>
+

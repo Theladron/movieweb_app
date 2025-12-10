@@ -1,9 +1,12 @@
+import logging
 from sqlalchemy.exc import SQLAlchemyError
 
 from datamanager.data_manager_interface import DataManagerInterface
 from datamanager.data_models import User, Movie, UserMovies
 from extensions import db
 from services.omdb_api import fetch_movie_data
+
+logger = logging.getLogger(__name__)
 
 
 class SQLiteDataManager(DataManagerInterface):
@@ -32,7 +35,7 @@ class SQLiteDataManager(DataManagerInterface):
         try:
             return self.db.session.query(User).all()
         except SQLAlchemyError as error:
-            print(f"Error fetching users: {error}")
+            logger.error(f"Error fetching users: {error}", exc_info=True)
             return []
 
     def get_all_movies(self):
@@ -43,7 +46,7 @@ class SQLiteDataManager(DataManagerInterface):
         try:
             return self.db.session.query(Movie).all()
         except SQLAlchemyError as error:
-            print(f"Error fetching movies: {error}")
+            logger.error(f"Error fetching movies: {error}", exc_info=True)
             return []
 
     def get_user_movies(self, user_id):
@@ -73,7 +76,7 @@ class SQLiteDataManager(DataManagerInterface):
                 movies.append(movie_dict)
             return movies
         except SQLAlchemyError as error:
-            print(f"Error fetching user movies: {error}")
+            logger.error(f"Error fetching user movies for user {user_id}: {error}", exc_info=True)
             return []
 
     def get_user(self, user_id):
@@ -87,8 +90,8 @@ class SQLiteDataManager(DataManagerInterface):
                 raise ValueError(f"No user found with ID {user_id}")
             return user
         except SQLAlchemyError as error:
-            print(f"Error fetching user with ID {user_id}: {error}")
-            return
+            # Re-raise as ValueError for consistency
+            raise ValueError(f"No user found with ID {user_id}") from error
 
     def add_user(self, user_name):
         """
@@ -183,7 +186,8 @@ class SQLiteDataManager(DataManagerInterface):
                 raise ValueError(f"No movie found with ID {movie_id}")
             return movie
         except SQLAlchemyError as error:
-            raise SQLAlchemyError(f"Error fetching movie with ID {movie_id}: {error}")
+            # Re-raise as ValueError for consistency
+            raise ValueError(f"No movie found with ID {movie_id}") from error
 
     def get_user_movie_rating(self, user_id, movie_id):
         """
@@ -313,7 +317,7 @@ class SQLiteDataManager(DataManagerInterface):
             return movie
 
         except SQLAlchemyError as e:
-            print(f"Error deleting movie for user {user_id}: {e}")
+            logger.error(f"Error deleting movie {movie_id} for user {user_id}: {e}", exc_info=True)
             self.db.session.rollback()
             return None
 
@@ -325,12 +329,7 @@ class SQLiteDataManager(DataManagerInterface):
         :param rating: new user rating for the movie as float
         """
         try:
-            # Verify the movie exists
-            movie_to_update = self.get_movie(movie_id)
-            if not movie_to_update:
-                raise ValueError(f"Movie with ID {movie_id} does not exist.")
-
-            # Find the linking entry for this user and movie
+            # Find the linking entry for this user and movie first
             user_movie = (
                 self.db.session.query(UserMovies)
                 .filter_by(user_id=user_id, movie_id=movie_id)
@@ -338,7 +337,7 @@ class SQLiteDataManager(DataManagerInterface):
             )
             
             if not user_movie:
-                raise ValueError(f"Movie with ID {movie_id} is not linked to user with ID {user_id}.")
+                raise ValueError(f"User has not added movie with ID {movie_id}.")
 
             # Update the user's rating in the linking table
             if rating is not None:
@@ -347,6 +346,6 @@ class SQLiteDataManager(DataManagerInterface):
             self.db.session.commit()
 
         except SQLAlchemyError as error:
-            print(f"Error occurred while updating movie rating for user {user_id}: {error}")
+            logger.error(f"Error occurred while updating movie rating for user {user_id}: {error}", exc_info=True)
             self.db.session.rollback()
             raise ValueError(f"Error occurred while updating movie rating: {error}")

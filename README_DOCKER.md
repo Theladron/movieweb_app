@@ -18,16 +18,16 @@ This document explains how to run the Movie Web App using Docker with PostgreSQL
    ```env
    # Flask Configuration
    FLASK_ENV=development
-   FLASK_PORT=5000
+   FLASK_PORT=<flask_port>
 
    # PostgreSQL Database Configuration
-   POSTGRES_USER=movieuser
-   POSTGRES_PASSWORD=moviepass
-   POSTGRES_DB=moviesdb
-   POSTGRES_PORT=5432
+   POSTGRES_USER=<postgres_username>
+   POSTGRES_PASSWORD=<postgres_password>
+   POSTGRES_DB=<database_name>
+   POSTGRES_PORT=<postgres_port>
 
    # OMDb API Key (required for fetching movie data)
-   OMDB_API_KEY=your_omdb_api_key_here
+   OMDB_API_KEY=<your_omdb_api_key>
    ```
 
 2. **Build and start the containers**:
@@ -36,8 +36,8 @@ This document explains how to run the Movie Web App using Docker with PostgreSQL
    ```
 
 3. **Access the application**:
-   - Web app: http://localhost:5000
-   - PostgreSQL: localhost:5432 (credentials from .env file)
+   - Web app: http://localhost:<flask_port>
+   - PostgreSQL: localhost:<postgres_port> (credentials from .env file)
 
 ## How It Works
 
@@ -45,7 +45,7 @@ This document explains how to run the Movie Web App using Docker with PostgreSQL
 
 - **web**: Flask application container
   - Runs Alembic migrations on startup
-  - Serves the Flask app on port 5000
+  - Serves the Flask app on port specified by `FLASK_PORT` (default: 5000)
   - Connects to PostgreSQL database
 
 - **db**: PostgreSQL 15 database container
@@ -94,7 +94,7 @@ docker-compose logs -f db
 
 ### Access PostgreSQL shell
 ```bash
-docker-compose exec db psql -U movieuser -d moviesdb
+docker-compose exec db psql -U <postgres_username> -d <database_name>
 ```
 
 ### Access Flask container shell
@@ -114,17 +114,26 @@ docker-compose exec web alembic upgrade head
 docker-compose exec web alembic downgrade -1
 ```
 
+### Run Tests
+```bash
+# Run all tests
+docker-compose run --rm tests
+
+# Run tests with coverage report
+docker-compose run --rm tests pytest --cov=. --cov-report=html
+```
+
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable | Description | Default/Example |
+|----------|-------------|-----------------|
 | `FLASK_ENV` | Flask environment | `development` |
 | `FLASK_PORT` | Flask port | `5000` |
-| `POSTGRES_USER` | PostgreSQL username | `movieuser` |
-| `POSTGRES_PASSWORD` | PostgreSQL password | `moviepass` |
-| `POSTGRES_DB` | Database name | `moviesdb` |
+| `POSTGRES_USER` | PostgreSQL username | `<your_postgres_username>` |
+| `POSTGRES_PASSWORD` | PostgreSQL password | `<your_postgres_password>` |
+| `POSTGRES_DB` | Database name | `<your_database_name>` |
 | `POSTGRES_PORT` | PostgreSQL port | `5432` |
-| `OMDB_API_KEY` | OMDb API key (required) | - |
+| `OMDB_API_KEY` | OMDb API key (required) | `<your_omdb_api_key>` |
 
 ## Troubleshooting
 
@@ -139,7 +148,8 @@ docker-compose exec web alembic downgrade -1
 - Reset database (⚠️ data loss): `docker-compose down -v && docker-compose up`
 
 ### Port conflicts
-- Change ports in `.env` file if 5000 or 5432 are already in use
+- Change `FLASK_PORT` in `.env` file if the default Flask port is already in use
+- Change `POSTGRES_PORT` in `.env` file if the default PostgreSQL port (5432) is already in use
 
 ## Development
 

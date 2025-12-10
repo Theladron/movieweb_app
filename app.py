@@ -3,18 +3,19 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 
-from db_validator import validate_database
 from extensions import db
-from managers import data_manager
+from datamanager import data_manager
 from routes import register_blueprints
+from config import setup_logging, configure_database
 
 load_dotenv()
 
 
 def create_app():
     """
-    Creates and configures the Flask application, calls for
-    database validation and blueprint registration.
+    Creates and configures the Flask application and registers blueprints.
+    Database schema is handled by Alembic migrations (Docker/PostgreSQL) 
+    or created automatically in tests (temporary SQLite databases).
     """
     # Get the base directory
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,29 +23,14 @@ def create_app():
     static_folder = os.path.join(basedir, 'static')
     app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
 
-    # Use PostgreSQL if DATABASE_URL is set, otherwise fall back to SQLite
-    database_url = os.getenv('DATABASE_URL')
-    if database_url:
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'pool_pre_ping': True,
-            'pool_recycle': 300,
-        }
-    else:
-        # Fallback to SQLite for local development
-        data_folder = os.path.join(basedir, 'data')
-        os.makedirs(data_folder, exist_ok=True)
-        db_file = os.path.join(data_folder, 'movies.db')
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_file}"
-
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    # Configure database connection
+    configure_database(app)
+    
+    # Setup logging based on environment
+    setup_logging(app)
+    
     db.init_app(app)
     data_manager.init_app(app)  # initialize with app here
-
-    # Only validate database if not using PostgreSQL (Alembic handles migrations for PostgreSQL)
-    if not database_url:
-        validate_database(app)
     
     register_blueprints(app)
 

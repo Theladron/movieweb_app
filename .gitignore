@@ -25,3 +25,15 @@ data/
 # Alembic
 # Keep migrations but ignore compiled Python files
 alembic/versions/*.pyc
+
+# Logs
+logs/
+*.log
+
+# Testing & Coverage
+htmlcov/
+.pytest_cache/
+.coverage
+.coverage.*
+*.cover
+.hypothesis/

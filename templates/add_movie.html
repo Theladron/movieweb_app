@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Add Movie - {{ user.name }}</title>
+    <title>Add Movie{% if user %} - {{ user.name }}{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/add_movie.css') }}">
 </head>
@@ -15,11 +15,11 @@
         <a href="/users"><button>Users</button></a>
     </nav>
     <div class="user_title">
-        <h1 class="title">{{ user.name }}'s Movies</h1>
+        <h1 class="title">{% if user %}{{ user.name }}'s Movies{% else %}Add Movie{% endif %}</h1>
         <p class="subtitle">Add a new movie to your collection</p>
     </div>
     
-    <form action="/users/{{ user.id }}/add_movie" method="POST" class="styled-form">
+    <form action="/users/{{ user_id if user_id else (user.id if user else '') }}/add_movie" method="POST" class="styled-form">
         <label for="title">🎬 Movie Title</label>
         <input 
             type="text" 
@@ -37,7 +37,13 @@
     {% endif %}
     
     <div style="text-align: center; margin: 2rem 0;">
+        {% if user %}
         <a href="{{ url_for('user.user_movies', user_id=user.id) }}" class="add-user-btn">← Back to My Movies</a>
+        {% elif user_id %}
+        <a href="{{ url_for('user.user_movies', user_id=user_id) }}" class="add-user-btn">← Back to My Movies</a>
+        {% else %}
+        <a href="{{ url_for('user.show_users') }}" class="add-user-btn">← Back to Users</a>
+        {% endif %}
     </div>
 </body>
 </html>

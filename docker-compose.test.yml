@@ -1,0 +1,45 @@
+# Docker Compose override for running tests
+# Usage: docker-compose -f docker-compose.test.yml run --rm tests
+# Or: docker-compose -f docker-compose.test.yml up tests
+
+services:
+  # Test database (separate from dev database)
+  test_db:
+    image: postgres:15-alpine
+    container_name: movie_test_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-testuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpass}
+      POSTGRES_DB: ${POSTGRES_DB:-test_moviesdb}
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-testuser}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Test service
+  tests:
+    build: .
+    container_name: movie_tests
+    command: sh -c "pytest tests/ -v --cov=. --cov-report=html --cov-report=term-missing"
+    volumes:
+      - .:/app
+      - test_coverage:/app/htmlcov  # Persist coverage reports
+    environment:
+      - FLASK_ENV=testing
+      # Uncomment to use PostgreSQL for tests:
+      # - DATABASE_URL=postgresql://${POSTGRES_USER:-testuser}:${POSTGRES_PASSWORD:-testpass}@test_db:5432/${POSTGRES_DB:-test_moviesdb}
+      - OMDB_API_KEY=${OMDB_API_KEY}
+    depends_on:
+      test_db:
+        condition: service_healthy
+    # Tests use SQLite by default (isolated per test)
+
+volumes:
+  test_postgres_data:
+  test_coverage:
+

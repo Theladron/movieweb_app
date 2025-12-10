@@ -5,3 +5,9 @@ requests~=2.32.3
 SQLAlchemy~=2.0.40
 psycopg2-binary~=2.9.9
 alembic~=1.13.0
+
+# Testing dependencies
+pytest~=8.0.0
+pytest-cov~=4.1.0
+selenium~=4.15.0
+webdriver-manager~=4.0.1

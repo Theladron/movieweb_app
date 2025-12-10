@@ -33,6 +33,27 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Test service - runs unit tests and exits
+  # Usage: docker-compose run --rm tests
+  tests:
+    build: .
+    container_name: movie_tests
+    command: sh -c "pytest tests/ -v --cov=. --cov-report=term-missing"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=testing
+      # Tests use temporary SQLite databases by default (via fixtures)
+      - DATABASE_URL=
+      - OMDB_API_KEY=${OMDB_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - testing  # Only start when explicitly requested with docker-compose run
+    # Note: Tests are isolated and use their own temporary databases
+    # For PostgreSQL testing, use docker-compose.test.yml instead
+
 volumes:
   postgres_data:
 

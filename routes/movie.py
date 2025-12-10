@@ -2,7 +2,7 @@ import sqlalchemy
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from sqlalchemy.exc import SQLAlchemyError
 
-from managers import data_manager as data
+from datamanager import data_manager as data
 
 movie_bp = Blueprint('movie', __name__)
 
@@ -21,15 +21,15 @@ def show_movies():
 def add_movie(user_id):
     """Adds a movie to the user's list of movies. Handles exceptions."""
     try:
-        user_name = data.get_user(user_id)
-    except sqlalchemy.exc.NoResultFound:
-        return render_template('add_movie.html', user=None,
+        user = data.get_user(user_id)
+    except (ValueError, sqlalchemy.exc.NoResultFound):
+        return render_template('add_movie.html', user=None, user_id=user_id,
                                message="User not found.")
     if request.method == "POST":
         title = request.form.get('title', '').strip()
 
         if not title:
-            return render_template('add_movie.html', user=user_name,
+            return render_template('add_movie.html', user=user, user_id=user_id,
                                    message="Title is required.")
 
         try:
@@ -37,34 +37,34 @@ def add_movie(user_id):
             result = data.add_movie(user_id, title)
 
             if result["message"] == "not_found":
-                return render_template('add_movie.html', user=user_name,
+                return render_template('add_movie.html', user=user, user_id=user_id,
                                        message=f"Movie '{title}' not found. Try again.")
 
             if result["message"] == "linked":
-                return render_template('add_movie.html', user=user_name,
+                return render_template('add_movie.html', user=user, user_id=user_id,
                                        message=f"Movie '{title}' is already in your list.")
 
             if result["message"] == "added":
-                return render_template('add_movie.html', user=user_name,
+                return render_template('add_movie.html', user=user, user_id=user_id,
                                        message=f"Movie '{title}' added successfully!")
 
         except sqlalchemy.exc.IntegrityError as e:
-            return render_template('add_movie.html', user=user_name,
+            return render_template('add_movie.html', user=user, user_id=user_id,
                                    message=f"Database constraint violated: {str(e)}")
 
         except sqlalchemy.exc.SQLAlchemyError as e:
-            return render_template('add_movie.html', user=user_name,
+            return render_template('add_movie.html', user=user, user_id=user_id,
                                    message=f"An unexpected database error occurred: {str(e)}")
 
         except ValueError as e:
-            return render_template('add_movie.html', user=user_name,
+            return render_template('add_movie.html', user=user, user_id=user_id,
                                    message=f"A database error occurred: {str(e)}")
 
         except Exception as e:
-            return render_template('add_movie.html', user=user_name,
+            return render_template('add_movie.html', user=user, user_id=user_id,
                                    message=f"An unexpected error occurred: {str(e)}")
 
-    return render_template('add_movie.html', user=user_name)
+    return render_template('add_movie.html', user=user, user_id=user_id)
 
 
 @movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])

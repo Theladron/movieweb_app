@@ -1,10 +1,13 @@
 import os
+import logging
 
 import requests
 from requests.exceptions import HTTPError, ConnectionError, Timeout
 
 # Get the API key from environment variables
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_movie_data(title):
@@ -25,18 +28,18 @@ def fetch_movie_data(title):
         response = requests.get(api_url, headers=headers)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx, 5xx)
     except (HTTPError, ConnectionError, Timeout) as req_err:
-        print(f"Request error occurred: {req_err}")
+        logger.warning(f"OMDb API request error for '{title}': {req_err}")
         return None
 
     try:
         data = response.json()
     except ValueError as json_err:
-        print(f"Error parsing JSON: {json_err}")
+        logger.error(f"Error parsing OMDb API JSON response for '{title}': {json_err}", exc_info=True)
         return None
 
     # Catch API error response
     if "Error" in data:
-        print(f"Error fetching movie data: {data['Error']}")
+        logger.info(f"OMDb API error for '{title}': {data['Error']}")
         return None
 
     # Extract relevant movie data

@@ -2,7 +2,7 @@ import sqlalchemy
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from sqlalchemy.exc import SQLAlchemyError
 
-from managers import data_manager as data
+from datamanager import data_manager as data
 
 user_bp = Blueprint('user', __name__)
 
@@ -46,14 +46,13 @@ def add_user():
             data.add_user(name)
 
         except ValueError as error:
-            return jsonify({"message": str(error)}), 400
+            return render_template("add_user.html", message=str(error))
         except SQLAlchemyError as error:
-            return jsonify({"message": str(error)}), 500
+            return render_template("add_user.html", message=f"Database error: {str(error)}")
         except Exception as error:
-            return jsonify({"message": str(error)}), 500
+            return render_template("add_user.html", message=f"Error: {str(error)}")
 
-        return render_template("add_user.html",
-                               message="User added successfully")
+        return redirect(url_for('user.show_users'))
 
     return render_template("add_user.html")
 
@@ -64,9 +63,6 @@ def user_movies(user_id):
     try:
         # Fetch user details
         user = data.get_user(user_id)
-        if not user:
-            return render_template('user_movies.html',
-                                   user=None, movies=None, message="Error")
 
         # Fetch user movies
         movies = data.get_user_movies(user_id)
@@ -77,6 +73,9 @@ def user_movies(user_id):
         return render_template('user_movies.html',
                                user=user, movies=movies)
 
+    except ValueError as error:
+        return render_template("user_movies.html",
+                               user=None, movies=None, message=str(error))
     except SQLAlchemyError as error:
         return render_template("user_movies.html",
                                user=None, movies=None, message=str(error))
@@ -91,73 +90,80 @@ def update_user(user_id):
     if request.method == "POST":
         name = request.form.get("name").strip()
 
+        # Get current user first (needed for template)
+        try:
+            current_user = data.get_user(user_id)
+        except ValueError as error:
+            return render_template("update_user.html",
+                                   user=None, user_id=user_id, message=str(error))
+
         # Check if the name is provided
         if not name:
             return render_template("update_user.html",
-                                   user=None, user_id=user_id, message="Name is required.")
+                                   user=current_user, user_id=user_id, message="Name is required.")
 
         # Check if the name is valid
         if len(name) < 2:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id,
+                                   user=current_user, user_id=user_id,
                                    message=f"Name must be at least 2 characters long.")
         if len(name) > 20:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id,
+                                   user=current_user, user_id=user_id,
                                    message=f"Name must be at most 20 characters long.")
 
-        # Check if the name already exists
-        try:
-            existing_user = data.get_user_by_name(name)
-            if existing_user:
+        # Check if the name already exists (but only if it's a different user)
+        if name != current_user.name:
+            try:
+                existing_user = data.get_user_by_name(name)
+                if existing_user and existing_user.id != user_id:
+                    return render_template("update_user.html",
+                                           user=current_user, user_id=user_id,
+                                           message=f"The user '{name}' already exists.")
+            except ValueError:
+                # User with that name doesn't exist, which is fine
+                pass
+            except SQLAlchemyError as error:
                 return render_template("update_user.html",
-                                       user=existing_user, user_id=user_id,
-                                       message=f"The user '{name}' already exists.")
-        except ValueError as error:
-            return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
-        except SQLAlchemyError as error:
-            return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
-        except Exception as error:
-            return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
+                                       user=current_user, user_id=user_id, message=str(error))
+            except Exception as error:
+                return render_template("update_user.html",
+                                       user=current_user, user_id=user_id, message=str(error))
 
         try:
             # Update user details
             data.update_user(user_id=user_id, user_name=name)
-            user = data.get_user(user_id)
         except ValueError as error:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
+                                   user=current_user, user_id=user_id, message=str(error))
         except SQLAlchemyError as error:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
+                                   user=current_user, user_id=user_id, message=str(error))
         except Exception as error:
             return render_template("update_user.html",
-                                   user=name, user_id=user_id, message=str(error))
+                                   user=current_user, user_id=user_id, message=str(error))
 
-        return render_template('update_user.html',
-                               message=f" New name: {user.name}. User updated successfully")
+        # Redirect to users list after successful update
+        return redirect(url_for('user.show_users'))
 
     try:
         user = data.get_user(user_id)
-    except sqlalchemy.exc.NoResultFound:
+    except ValueError:
         return render_template('update_user.html',
                                user=None, user_id=user_id, message="User not found.")
+    except Exception as error:
+        return render_template('update_user.html',
+                               user=None, user_id=user_id, message=str(error))
     return render_template('update_user.html', user=user, user_id=user_id)
 
 
-@user_bp.route('/users/<user_id>/delete_user', methods=['GET'])
+@user_bp.route('/users/<int:user_id>/delete_user', methods=['GET'])
 def delete_user(user_id):
     """Delete a user from the system, handles exceptions."""
     try:
         user_name = data.delete_user(user_id)
-        if not user_name:
-            return redirect(url_for('user.users', message="User not found."))
-
-        return redirect(url_for('user.users', message=f"User '{user_name}' deleted successfully."))
+        return redirect(url_for('user.show_users'))
     except ValueError as error:
-        return redirect(url_for('user.users', message=str(error)))
+        return redirect(url_for('user.show_users'))
     except Exception as error:
-        return redirect(url_for('user.users', message=str(error)))
+        return redirect(url_for('user.show_users'))
