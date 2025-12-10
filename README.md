@@ -33,43 +33,48 @@ movieweb_app/
 └── tests/               # Unit tests (backend & frontend)
 ```
 
-## Quick Start
+## Quick Start (SQLite-first)
 
 ### Prerequisites
 
-- Docker Desktop installed and running
+- Python 3.11+
 - OMDb API key ([Get one here](http://www.omdbapi.com/apikey.aspx))
 - Gemini API key (optional, for AI movie recommendations) ([Get one here](https://ai.google.dev/))
 
-### Installation
+### Installation (local or PythonAnywhere-friendly)
 
 1. Clone the repository
-2. Create a `.env` file (see `.env.example`)
-3. Add your API keys to `.env`:
+2. Create and activate a virtual environment
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   ```
+3. Install dependencies
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Create a `.env` file (see `.env.example` if present) and set:
    - `OMDB_API_KEY` (required)
    - `GEMINI_API_KEY` (optional, for AI recommendations)
-4. Start the application:
-
-```bash
-docker-compose up --build
-```
-
-5. Access the app at http://localhost:<flask_port> (default: 5000)
-
-**Note:** Database migrations are automatically applied on container startup, so the app is ready to use immediately after `docker-compose up`.
-
-For detailed Docker setup and commands, see [README_DOCKER.md](README_DOCKER.md).
+   - `FLASK_ENV=production` (recommended for hosted environments)
+5. Run database migrations (SQLite file lives in `data/movies.db`)
+   ```bash
+   mkdir -p data
+   alembic upgrade head
+   ```
+   If you skip this step, the app will create tables lazily on first run when using SQLite.
+6. Start the app
+   ```bash
+   python app.py
+   ```
+7. Access the app at http://localhost:5000
 
 ## Testing
 
-Run tests using Docker:
+Run tests locally:
 
 ```bash
-# Run all tests
-docker-compose run --rm tests
-
-# Run with coverage report
-docker-compose run --rm tests pytest --cov=. --cov-report=html
+pytest tests/ -v
 ```
 
 ## API Endpoints
@@ -81,11 +86,11 @@ docker-compose run --rm tests pytest --cov=. --cov-report=html
 
 ## Tech Stack
 
-- **Backend**: Flask, SQLAlchemy, PostgreSQL
+- **Backend**: Flask, SQLAlchemy
 - **Frontend**: HTML/CSS, Jinja2 templates
 - **Testing**: pytest, Selenium
-- **Database**: PostgreSQL (Docker) or SQLite (local)
-- **Migrations**: Alembic
+- **Database**: SQLite (default, file at `data/movies.db`)
+- **Migrations**: Alembic (works with SQLite)
 - **Logging**: Python logging with environment-based configuration
 
 ## Logging

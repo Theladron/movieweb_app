@@ -62,9 +62,19 @@ Return the movies as a JSON array only."""
         # Available models can be checked with: genai.list_models()
         model = genai.GenerativeModel('gemini-flash-latest')
         response = model.generate_content(prompt)
-        
-        # Extract text from response
-        response_text = response.text.strip()
+
+        # Extract text from response, handling multi-part content
+        try:
+            response_text = response.text.strip()
+        except Exception:
+            # Fallback: concatenate any text parts
+            response_parts = []
+            for candidate in getattr(response, "candidates", []) or []:
+                for part in getattr(getattr(candidate, "content", None), "parts", []) or []:
+                    text_part = getattr(part, "text", None)
+                    if text_part:
+                        response_parts.append(text_part)
+            response_text = "\n".join(response_parts).strip()
         
         # Try to parse as JSON first
         try:

@@ -14,6 +14,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from dotenv import load_dotenv
 load_dotenv()
 
+# Ensure SQLite data directory exists (for default sqlite:///data/movies.db)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

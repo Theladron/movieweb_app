@@ -20,6 +20,10 @@ def fetch_movie_data(movie_title: str) -> dict | None:
         dict | None: Dictionary containing movie data with keys: title, director,
             rating, release_year, poster. Returns None if movie not found or error occurs.
     """
+    if not OMDB_API_KEY:
+        logger.error("OMDB_API_KEY is not set; cannot fetch movie data.")
+        return None
+
     omdb_api_url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&t={movie_title}"
 
     request_headers = {

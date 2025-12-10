@@ -4,33 +4,33 @@ from logging.handlers import RotatingFileHandler
 
 
 def configure_database(app):
-    """Configure database connection based on environment.
+    """Configure database connection using SQLite by default.
 
-    Sets up PostgreSQL if DATABASE_URL starts with postgresql://,
-    otherwise falls back to SQLite for local development or testing.
+    Uses `DATABASE_URL` only when it points to a SQLite database; otherwise
+    falls back to a local `data/movies.db` file. This keeps the application
+    compatible with platforms like PythonAnywhere that do not offer PostgreSQL
+    on the free tier.
 
     Args:
         app: The Flask application instance to configure.
     """
     database_url = os.getenv('DATABASE_URL')
-    if database_url and database_url.startswith('postgresql://'):
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'pool_pre_ping': True,
-            'pool_recycle': 300,
-        }
+    base_directory = os.path.abspath(os.path.dirname(__file__))
+
+    if database_url and database_url.startswith('sqlite:///'):
+        # Normalize relative SQLite URIs to absolute paths to avoid "unable to open database file"
+        sqlite_path = database_url.replace('sqlite:///', '', 1)
+        if not sqlite_path.startswith('/'):
+            sqlite_path = os.path.join(base_directory, sqlite_path)
+        os.makedirs(os.path.dirname(sqlite_path), exist_ok=True)
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{sqlite_path}"
     else:
-        # Use DATABASE_URL if set (for tests with temp SQLite), otherwise fall back to default SQLite
-        if database_url and database_url.startswith('sqlite:///'):
-            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-        else:
-            # Fallback to SQLite for local development
-            basedir = os.path.abspath(os.path.dirname(__file__))
-            data_folder = os.path.join(basedir, 'data')
-            os.makedirs(data_folder, exist_ok=True)
-            db_file = os.path.join(data_folder, 'movies.db')
-            app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_file}"
-    
+        # Default to a local SQLite database file
+        data_folder = os.path.join(base_directory, 'data')
+        os.makedirs(data_folder, exist_ok=True)
+        db_file = os.path.join(data_folder, 'movies.db')
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_file}"
+
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 

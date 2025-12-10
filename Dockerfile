@@ -12,7 +12,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Install system dependencies including Chrome and ChromeDriver dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
-    postgresql-client \
     wget \
     curl \
     chromium \

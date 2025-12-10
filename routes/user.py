@@ -2,6 +2,17 @@ import sqlalchemy
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for
 from sqlalchemy.exc import SQLAlchemyError
 
+
+def _validate_username(name: str) -> str | None:
+    """Validate username and return an error message or None if valid."""
+    if not name:
+        return "Name is required."
+    if len(name) < 2:
+        return "Name must be at least 2 characters long."
+    if len(name) > 20:
+        return "Name must be at most 20 characters long."
+    return None
+
 from datamanager import data_manager as data
 
 user_bp = Blueprint('user', __name__)
@@ -33,26 +44,19 @@ def add_user():
         Response: Redirect to users list on success, or form with error message.
     """
     if request.method == "POST":
-        name = request.form.get('name').strip()
+        name = request.form.get('name', '').strip()
 
-        # Check if the name is provided
-        if not name:
-            return render_template("add_user.html",
-                                   message="Name is required.")
-
-        # Check if the name is valid
-        if len(name) < 2:
-            return render_template("add_user.html",
-                                   message=f"Name must be at least 2 characters long.")
-        if len(name) > 20:
-            return render_template("add_user.html",
-                                   message=f"Name must be at most 20 characters long.")
+        validation_error = _validate_username(name)
+        if validation_error:
+            return render_template("add_user.html", message=validation_error)
         # Check if the name already exists
         try:
             existing_user = data.get_user_by_name(name)
             if existing_user:
-                return render_template("add_user.html",
-                                       message=f"The user '{name}' already exists.")
+                return render_template(
+                    "add_user.html",
+                    message=f"The user '{name}' already exists."
+                )
 
             data.add_user(name)
 
@@ -116,7 +120,7 @@ def update_user(user_id):
         Response: Redirect to users list on success, or form with error message.
     """
     if request.method == "POST":
-        name = request.form.get("name").strip()
+        name = request.form.get("name", "").strip()
 
         # Get current user first (needed for template)
         try:
@@ -125,29 +129,23 @@ def update_user(user_id):
             return render_template("update_user.html",
                                    user=None, user_id=user_id, message=str(value_error))
 
-        # Check if the name is provided
-        if not name:
-            return render_template("update_user.html",
-                                   user=current_user, user_id=user_id, message="Name is required.")
-
-        # Check if the name is valid
-        if len(name) < 2:
+        validation_error = _validate_username(name)
+        if validation_error:
             return render_template("update_user.html",
                                    user=current_user, user_id=user_id,
-                                   message=f"Name must be at least 2 characters long.")
-        if len(name) > 20:
-            return render_template("update_user.html",
-                                   user=current_user, user_id=user_id,
-                                   message=f"Name must be at most 20 characters long.")
+                                   message=validation_error)
 
         # Check if the name already exists (but only if it's a different user)
         if name != current_user.name:
             try:
                 existing_user = data.get_user_by_name(name)
                 if existing_user and existing_user.id != user_id:
-                    return render_template("update_user.html",
-                                           user=current_user, user_id=user_id,
-                                           message=f"The user '{name}' already exists.")
+                    return render_template(
+                        "update_user.html",
+                        user=current_user,
+                        user_id=user_id,
+                        message=f"The user '{name}' already exists."
+                    )
             except ValueError:
                 # User with that name doesn't exist, which is fine
                 pass

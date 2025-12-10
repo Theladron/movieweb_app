@@ -81,7 +81,7 @@ def add_movie(user_id):
     return render_template('add_movie.html', user=user, user_id=user_id)
 
 
-@movie_bp.route('/users/<user_id>/update_movie/<movie_id>', methods=['GET', 'POST'])
+@movie_bp.route('/users/<int:user_id>/update_movie/<int:movie_id>', methods=['GET', 'POST'])
 def update_movie(user_id, movie_id):
     """Update a user's rating for a movie.
 
@@ -101,10 +101,10 @@ def update_movie(user_id, movie_id):
         current_user_rating = data.get_user_movie_rating(user_id, movie_id)
     except sqlalchemy.exc.NoResultFound:
         return render_template('update_movie.html', movie=None,
-                               message="Movie not found.")
+                               message="Movie not found.", user_id=user_id)
     except ValueError as value_error:
         return render_template('update_movie.html', movie=None,
-                               message=str(value_error))
+                               message=str(value_error), user_id=user_id)
     
     if request.method == "POST":
         user_rating_input = request.form.get('rating', '').strip()

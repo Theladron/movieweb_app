@@ -27,17 +27,20 @@
             </div>
 
             <div class="user-actions">
-            <a href="{{ url_for('user.update_user', user_id=user.id) }}">
-            <button class="update">Update</button>
-            </a>
+                <a href="{{ url_for('user.update_user', user_id=user.id) }}">
+                    <button class="update">Update</button>
+                </a>
 
-            <a href="{{ url_for('user.delete_user', user_id=user.id) }}">
-            <button class="remove">Delete</button>
-        </a>
+                <a href="{{ url_for('user.delete_user', user_id=user.id) }}">
+                    <button class="remove">Delete</button>
+                </a>
+            </div>
         </li>
         {% endfor %}
     </ul>
 
-    <a href="/add_user" class="add-user-btn">Add User</a>
+    <div class="user-actions-bottom">
+        <a href="/add_user" class="add-user-btn">Add User</a>
+    </div>
 </body>
 </html>

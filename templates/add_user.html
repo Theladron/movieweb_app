@@ -24,5 +24,9 @@
     {% if message %}
     <p class="alert-message">{{ message }}</p>
     {% endif %}
+
+    <div class="user-actions-bottom">
+      <a href="{{ url_for('user.show_users') }}" class="back-users-btn">← Back to Users</a>
+    </div>
   </body>
 </html>

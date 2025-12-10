@@ -36,13 +36,13 @@
     <p class="alert-message {% if 'successfully' in message or 'added' in message.lower() %}success{% endif %}">{{ message }}</p>
     {% endif %}
     
-    <div style="text-align: center; margin: 2rem 0;">
+    <div class="user-actions-bottom">
         {% if user %}
         <a href="{{ url_for('user.user_movies', user_id=user.id) }}" class="add-user-btn">← Back to My Movies</a>
         {% elif user_id %}
         <a href="{{ url_for('user.user_movies', user_id=user_id) }}" class="add-user-btn">← Back to My Movies</a>
         {% else %}
-        <a href="{{ url_for('user.show_users') }}" class="add-user-btn">← Back to Users</a>
+        <a href="{{ url_for('user.show_users') }}" class="back-users-btn">← Back to Users</a>
         {% endif %}
     </div>
 </body>

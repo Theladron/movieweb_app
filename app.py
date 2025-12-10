@@ -16,7 +16,7 @@ def create_app():
 
     Creates Flask app instance, configures database connection and logging,
     initializes extensions, and registers all blueprints.
-    Database schema is handled by Alembic migrations (Docker/PostgreSQL)
+    Database schema is handled by Alembic migrations (SQLite by default)
     or created automatically in tests (temporary SQLite databases).
 
     Returns:
