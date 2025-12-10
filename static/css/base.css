@@ -1,0 +1,291 @@
+/* Color Palette - Subtle Yellow Theme */
+:root {
+    --yellow-primary: #f4d03f;
+    --yellow-light: #f9e79f;
+    --yellow-dark: #d4ac0d;
+    --yellow-accent: #f7dc6f;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --dark-overlay: rgba(0, 0, 0, 0.4);
+    --text-primary: #2c3e50;
+    --text-light: #ffffff;
+    --shadow-soft: rgba(0, 0, 0, 0.1);
+    --shadow-medium: rgba(0, 0, 0, 0.2);
+    --shadow-strong: rgba(0, 0, 0, 0.3);
+}
+
+/* Reset basic margins and paddings */
+* {
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100%;
+    background-image: url('/static/images/movie-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Top navigation bar - Glass effect */
+nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 8px 32px var(--shadow-soft);
+}
+
+/* Navigation buttons */
+nav a {
+    text-decoration: none;
+}
+
+nav button {
+    margin-right: 1rem;
+    padding: 0.7rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-soft);
+}
+
+nav button:hover {
+    background: var(--yellow-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-medium);
+    border-color: var(--yellow-dark);
+}
+
+/* Main title styling */
+.title {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    color: var(--yellow-dark);
+    -webkit-text-stroke: 2px #000000;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8),
+                 -2px -2px 4px rgba(0, 0, 0, 0.8),
+                 2px -2px 4px rgba(0, 0, 0, 0.8),
+                 -2px 2px 4px rgba(0, 0, 0, 0.8),
+                 0 0 10px rgba(244, 208, 63, 0.3),
+                 2px 2px 8px rgba(244, 208, 63, 0.4);
+    letter-spacing: 2px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Description block */
+.description {
+    max-width: 800px;
+    margin: 0.5rem auto;
+    padding: 0.5rem;
+}
+
+.description p, .subtitle {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0.3rem 0;
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    opacity: 0.8;
+}
+
+/* Glass Card Effect - Base */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--shadow-strong),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px var(--shadow-strong),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Alert message */
+.alert-message {
+    color: #e74c3c;
+    text-align: center;
+    font-size: 1.1rem;
+    margin: 2rem auto;
+    background: rgba(231, 76, 60, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    padding: 1rem 1.5rem;
+    width: fit-content;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px var(--shadow-soft);
+}
+
+.alert-message.success {
+    color: #27ae60;
+    background: rgba(39, 174, 96, 0.15);
+    border-color: rgba(39, 174, 96, 0.4);
+}
+
+/* Styled forms - Glass effect */
+.styled-form, .form {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 3rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px var(--shadow-strong),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.styled-form label, .form label {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.5rem;
+}
+
+.styled-form input[type="text"],
+.form input[type="text"] {
+    padding: 1rem 1.2rem;
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.styled-form input[type="text"]:focus,
+.form input[type="text"]:focus {
+    border-color: var(--yellow-primary);
+    box-shadow: 0 0 0 4px rgba(244, 208, 63, 0.2),
+                0 4px 15px var(--shadow-soft);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.styled-form input[type="submit"],
+.form input[type="submit"] {
+    background: linear-gradient(135deg, var(--yellow-primary) 0%, var(--yellow-dark) 100%);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-medium);
+    margin-top: 0.5rem;
+}
+
+.styled-form input[type="submit"]:hover,
+.form input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-strong);
+    background: linear-gradient(135deg, var(--yellow-dark) 0%, var(--yellow-primary) 100%);
+}
+
+/* Add user/movie button - No glass effect, solid styling */
+.add-user-btn {
+    display: block;
+    width: fit-content;
+    margin: 3rem auto;
+    padding: 1.2rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--yellow-primary) 0%, var(--yellow-dark) 100%);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px var(--shadow-medium);
+    border: 2px solid var(--yellow-dark);
+}
+
+.add-user-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px var(--shadow-strong);
+    background: linear-gradient(135deg, var(--yellow-dark) 0%, var(--yellow-primary) 100%);
+}
+
+/* User title section */
+.user_title {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 2rem;
+}
+
+.user_title .title {
+    margin-top: 0;
+}
+
+/* Responsive typography */
+@media screen and (max-width: 768px) {
+    .title {
+        font-size: 2.8rem;
+    }
+
+    nav button {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .styled-form, .form {
+        margin: 2rem 1rem;
+        padding: 2rem;
+    }
+
+    .description p {
+        font-size: 1.1rem;
+    }
+}
+

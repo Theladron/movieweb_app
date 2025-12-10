@@ -1,0 +1,152 @@
+/* Container holding all movie cards */
+.movies_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Individual movie card - Yellow glass effect */
+.movie_card {
+    width: 280px;
+    background: rgba(244, 208, 63, 0.25);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 2px solid rgba(244, 208, 63, 0.5);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 0 30px rgba(244, 208, 63, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.movie_card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(244, 208, 63, 0.2) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.movie_card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                0 0 40px rgba(244, 208, 63, 0.4);
+    border-color: rgba(244, 208, 63, 0.8);
+    background: rgba(244, 208, 63, 0.35);
+}
+
+.movie_card:hover::before {
+    opacity: 1;
+}
+
+/* Movie poster styling */
+.movie_poster {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    transition: transform 0.4s ease;
+}
+
+/* Remove poster scaling on hover - card already scales */
+.movie_card:hover .movie_poster {
+    transform: none;
+}
+
+/* Movie details container */
+.movie_details {
+    padding: 1.5rem;
+    text-align: left;
+    color: var(--text-primary);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    margin: 0;
+}
+
+/* Movie title */
+.movie_title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #6d5209;
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.6),
+                 0 0 8px rgba(244, 208, 63, 0.3);
+    line-height: 1.3;
+}
+
+/* Movie year, rating, and director */
+.movie_year,
+.movie-director,
+.movie_director {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.movie_rating {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #8b6914;
+}
+
+/* Label values */
+.movie_details strong {
+    color: #6d5209;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.movie_details span {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* No movies fallback */
+.no_movies, .no_movies_message {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 4rem;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 8px 32px var(--shadow-strong);
+}
+
+/* Responsive for movies */
+@media screen and (max-width: 768px) {
+    .movie_card {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .movie_poster {
+        height: 450px;
+    }
+}
+

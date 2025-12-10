@@ -16,7 +16,11 @@ def create_app():
     Creates and configures the Flask application, calls for
     database validation and blueprint registration.
     """
-    app = Flask(__name__)
+    # Get the base directory
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    # Explicitly set static folder path
+    static_folder = os.path.join(basedir, 'static')
+    app = Flask(__name__, static_folder=static_folder, static_url_path='/static')
 
     # Use PostgreSQL if DATABASE_URL is set, otherwise fall back to SQLite
     database_url = os.getenv('DATABASE_URL')
@@ -28,7 +32,6 @@ def create_app():
         }
     else:
         # Fallback to SQLite for local development
-        basedir = os.path.abspath(os.path.dirname(__file__))
         data_folder = os.path.join(basedir, 'data')
         os.makedirs(data_folder, exist_ok=True)
         db_file = os.path.join(data_folder, 'movies.db')
@@ -44,15 +47,6 @@ def create_app():
         validate_database(app)
     
     register_blueprints(app)
-
-    # Ensure static files (CSS) load properly to prevent FOUC
-    @app.after_request
-    def add_header(response):
-        # Add headers to prevent premature rendering
-        if response.content_type and 'text/html' in response.content_type:
-            response.headers['X-Content-Type-Options'] = 'nosniff'
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        return response
 
     return app
 

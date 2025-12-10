@@ -1,0 +1,126 @@
+/* User movies page - extends movies.css styles */
+/* Movie actions container */
+.movie_actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    margin-top: auto;
+    background: rgba(244, 208, 63, 0.1);
+    backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(244, 208, 63, 0.3);
+}
+
+/* Action icons - Yellow glass styling */
+.movie_actions a.action_icon {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    background: rgba(244, 208, 63, 0.3);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(244, 208, 63, 0.6);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    color: #6d5209;
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-width: 44px;
+    min-height: 44px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    gap: 0.5rem;
+}
+
+.movie_actions a.action_icon:hover {
+    background: rgba(244, 208, 63, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 208, 63, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-color: rgba(244, 208, 63, 0.8);
+}
+
+.movie_actions a.action_icon .icon {
+    font-size: 1.2rem;
+    display: block;
+    flex-shrink: 0;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.movie_actions a.action_icon span:not(.icon) {
+    display: block;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Delete button - Yellow glass styling */
+.movie_actions .remove_button {
+    background: rgba(231, 76, 60, 0.25);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    margin: 0;
+    font-family: inherit;
+    gap: 0.5rem;
+}
+
+.movie_actions .remove_button:hover {
+    background: rgba(231, 76, 60, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border-color: rgba(231, 76, 60, 0.7);
+}
+
+.movie_actions .remove_button .icon {
+    font-size: 1.2rem;
+    display: block;
+    flex-shrink: 0;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.movie_actions .remove_button span:not(.icon) {
+    display: block;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* Ensure buttons don't have default text alignment issues */
+.movie_actions form {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie_actions button,
+.movie_actions a {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Reset any default button styles that might cause alignment issues */
+.movie_actions button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
